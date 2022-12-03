@@ -1,6 +1,5 @@
 package edu.vanier.ufo.ui;
 
-import com.sun.javafx.scene.traversal.Hueristic2D;
 import edu.vanier.ufo.helpers.ResourcesManager;
 import edu.vanier.ufo.engine.*;
 import edu.vanier.ufo.game.*;
@@ -14,19 +13,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.util.Random;
 import javafx.application.Application;
-import static javafx.application.Application.STYLESHEET_MODENA;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Bounds;
 import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 
 /**
  * This is a simple game world simulating a bunch of spheres looking like atomic
@@ -50,6 +48,8 @@ public class GameWorld extends GameEngine {
     private int level;
     private int numberOfInvaders;
 
+    private Stage primaryStage;
+
 
     /* 
     Returns the boolean of approximative equal. 
@@ -69,19 +69,14 @@ public class GameWorld extends GameEngine {
     private final DoubleProperty mouseY = new SimpleDoubleProperty();
 
     private Ship spaceShip = new Ship();
-
     private Map map;
+
     private HBox HUD = new HBox();
-    Label gameScoreLabel = new Label();
-    Label levelLabel = new Label("Level : ");
 
     public GameWorld(int fps, String title, int level) {
         super(fps, title);
         this.level = level;
-        this.numberOfInvaders = 10 * this.level;
-        gameScoreLabel.textProperty().bind(this.getGameScore().asString().concat(" Points"));
-        this.levelLabel.setText(this.levelLabel.getText() + this.level);
-        HUD.getChildren().addAll(gameScoreLabel, levelLabel);
+        this.numberOfInvaders = 5 * this.level;
 
     }
 
@@ -92,6 +87,8 @@ public class GameWorld extends GameEngine {
      */
     @Override
     public void initialize(final Stage primaryStage) {
+
+        this.primaryStage = primaryStage;
 
         // Sets the window title
         primaryStage.setTitle(getWindowTitle());
@@ -116,15 +113,7 @@ public class GameWorld extends GameEngine {
         cam.layoutYProperty().bind(spaceShip.getNode().layoutYProperty().subtract(primaryStage.heightProperty().divide(2)).add(spaceShip.getNode().getBoundsInLocal().getHeight() / 2));
 
         // Create HUD
-        gameScoreLabel.setFont(new Font(Application.STYLESHEET_CASPIAN, 20));
-        gameScoreLabel.setTextFill(Color.WHEAT);
-        levelLabel.setFont(new Font(Application.STYLESHEET_CASPIAN, 20));
-        levelLabel.setTextFill(Color.WHEAT);
-
-        HUD.setSpacing(30);
-        getSceneNodes().getChildren().add(HUD);
-        HUD.layoutXProperty().bind(cam.layoutXProperty());
-        HUD.layoutYProperty().bind(cam.layoutYProperty());
+        createHUD(cam);
 
         // Change the background of the main scene.
         getGameSurface().setFill(Color.BLACK);
@@ -140,9 +129,12 @@ public class GameWorld extends GameEngine {
         getSpriteManager().addSprites(spaceShip);
         getSceneNodes().getChildren().add(spaceShip.getNode());
 
-        // load sound files
-        getSoundManager().loadSoundEffects("laser", getClass().getClassLoader().getResource(ResourcesManager.SOUND_LASER));
+        loadSoundSource();
 
+    }
+
+    private void loadSoundSource() {
+        getSoundManager().loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION_SOUND));
     }
 
     private Camera createCamera() {
@@ -151,6 +143,48 @@ public class GameWorld extends GameEngine {
         camera.setNearClip(0.0001);
 
         return camera;
+    }
+
+    private void createHUD(Camera cam) {
+
+        Label gameScoreLabel = new Label();
+        Label levelLabel = new Label("Level : ");
+        StackPane health = new StackPane();
+
+        gameScoreLabel.textProperty()
+                .bind(getGameScore().asString().concat(" Points"));
+        gameScoreLabel.setFont(
+                new Font(Application.STYLESHEET_CASPIAN, 20));
+        gameScoreLabel.setTextFill(Color.WHEAT);
+
+        levelLabel.setFont(
+                new Font(Application.STYLESHEET_CASPIAN, 20));
+        levelLabel.setTextFill(Color.WHEAT);
+
+        levelLabel.setText(levelLabel.getText() + level);
+
+        ImageView heartView = new ImageView();
+        Image heartImage = new Image(ResourcesManager.HEART);
+        heartView.setImage(heartImage);
+        Label hearthCount = new Label();
+        hearthCount.setFont(new Font(20));
+        hearthCount.setTextFill(Color.WHEAT);
+        hearthCount.textProperty().bind(spaceShip.getHealth().asString());
+
+        health.getChildren().addAll(heartView, hearthCount);
+
+        HUD.getChildren()
+                .addAll(gameScoreLabel, levelLabel, health);
+        HUD.setSpacing(
+                30);
+        HUD.layoutXProperty()
+                .bind(cam.layoutXProperty());
+        HUD.layoutYProperty()
+                .bind(cam.layoutYProperty());
+        getSceneNodes()
+                .getChildren().add(HUD);
+
+        HUD.prefWidthProperty().bind(primaryStage.widthProperty());
     }
 
     /**
@@ -185,7 +219,6 @@ public class GameWorld extends GameEngine {
 
                 Missile missile = spaceShip.fire();
                 getSpriteManager().addSprites(missile);
-                getSoundManager().playSound("laser");
                 getSceneNodes().getChildren().add(missile.getNode());
                 missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
                 missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
@@ -205,6 +238,12 @@ public class GameWorld extends GameEngine {
                 spaceShip.changeWeapon(e.getCode());
             }
             if (e.getCode() == KeyCode.DIGIT2) {
+                spaceShip.changeWeapon(e.getCode());
+            }
+            if (e.getCode() == KeyCode.DIGIT3) {
+                spaceShip.changeWeapon(e.getCode());
+            }
+            if (e.getCode() == KeyCode.DIGIT4) {
                 spaceShip.changeWeapon(e.getCode());
             }
 
@@ -244,8 +283,38 @@ public class GameWorld extends GameEngine {
     }
 
     private void generateInvaders() {
+        double percentageEnemy1 = 0.5;
+        double percentageEnemy2 = 0.33;
+        double percentageEnemy3 = 0.12;
+        double percentageBoss = 0.05;
         for (int i = 0; i < numberOfInvaders; i++) {
-            Invader invader = new Invader(spaceShip);
+
+            Invader invader;
+            double percentage = Math.random();
+
+            if (percentage < percentageBoss) {
+                invader = new Invader(spaceShip, ResourcesManager.BOSS, level);
+                invader.setPoint(500);
+                invader.setHealth(2000);
+
+            } else if (percentage < percentageEnemy3) {
+                invader = new Invader(spaceShip, ResourcesManager.ENEMY3, level);
+                invader.setPoint(100);
+                invader.setHealth(1000);
+
+            } else if (percentage < percentageEnemy2) {
+                invader = new Invader(spaceShip, ResourcesManager.ENEMY2, level);
+                invader.setPoint(50);
+                invader.setHealth(500);
+
+            } else {
+                invader = new Invader(spaceShip, ResourcesManager.ENEMY1, level);
+                invader.setPoint(20);
+                invader.setHealth(200);
+
+            }
+
+            getSpriteManager().addInvader(invader);
 
             int rangeOfSpawn = (Map.getMAP_RADIUS());
 

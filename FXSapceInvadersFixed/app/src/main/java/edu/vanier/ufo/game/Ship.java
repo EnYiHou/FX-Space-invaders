@@ -1,8 +1,11 @@
 package edu.vanier.ufo.game;
 
+import edu.vanier.ufo.engine.GameEngine;
 import edu.vanier.ufo.helpers.ResourcesManager;
 import edu.vanier.ufo.engine.Sprite;
 import javafx.animation.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
@@ -57,16 +60,15 @@ public class Ship extends Sprite {
      * The collision bounding region for the ship
      */
     private Circle hitBounds;
-    
-    
-    private int health = 3;
+
+    private IntegerProperty health = new SimpleIntegerProperty(3);
 
     private boolean wPressed, aPressed, sPressed, dPressed = false;
 
     public Ship() {
 
         // Load one image.
-        ImageView shipImageView = new ImageView(ResourcesManager.SPACE_STAR_SHIP);
+        ImageView shipImageView = new ImageView(ResourcesManager.SPACE_SHIP1);
         flipBook.getChildren().add(shipImageView);
 
         // set javafx node to an imagefirstShip.setVisible(true);
@@ -114,13 +116,13 @@ public class Ship extends Sprite {
         // build hit zone
         if (hitBounds == null) {
             //RotatedShipImage firstShip = directionalShips.get(0);
-            
+
             hitBounds = new Circle();
             hitBounds.setCenterX(getCenterX());
             hitBounds.setCenterY(getCenterY());
             hitBounds.setOpacity(0);
             hitBounds.setRadius(50);
-             flipBook.getChildren().add(hitBounds);
+            flipBook.getChildren().add(hitBounds);
             setCollidingNode(hitBounds);
             setOriginalCollidingNode(hitBounds);
         }
@@ -135,8 +137,8 @@ public class Ship extends Sprite {
         accelerate();
         deccelerate();
 
-         getNode().setLayoutX( getNode().getLayoutX() + vX);
-         getNode().setLayoutY( getNode().getLayoutY() - vY);
+        getNode().setLayoutX(getNode().getLayoutX() + vX);
+        getNode().setLayoutY(getNode().getLayoutY() - vY);
 
     }
 
@@ -193,17 +195,25 @@ public class Ship extends Sprite {
      *
      * @return The scene or screen X coordinate.
      */
-  
-
     public Missile fire() {
         Missile fireMissile;
         float slowDownAmt = 0;
-        if (KeyCode.DIGIT2 == keyCode) {
-            fireMissile = new Missile(ResourcesManager.ROCKET_FIRE);
-            slowDownAmt = 1f;
-        } else {
-            fireMissile = new Missile(ResourcesManager.ROCKET_SMALL);
+        if (KeyCode.DIGIT4 == keyCode) {
+            fireMissile = new Missile(ResourcesManager.ROCKET_ULTIMATE);
+            slowDownAmt = 3f;
+            fireMissile.setDamage(500);
+        } else if (KeyCode.DIGIT2 == keyCode) {
+            fireMissile = new Missile(ResourcesManager.ROCKET_MEDIUM);
             slowDownAmt = 2.3f;
+            fireMissile.setDamage(200);
+        } else if (KeyCode.DIGIT3 == keyCode) {
+            fireMissile = new Missile(ResourcesManager.ROCKET_HUGE);
+            slowDownAmt = 5f;
+            fireMissile.setDamage(300);
+        } else {
+            fireMissile = new Missile(ResourcesManager.ROCKET_NORMAL);
+            slowDownAmt = 3f;
+            fireMissile.setDamage(100);
         }
 
         fireMissile.setVelocityX(this.vX + Math.cos(Math.toRadians(this.getNode().getRotate())) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
@@ -261,9 +271,22 @@ public class Ship extends Sprite {
             setCollidingNode(hitBounds);
         }
     }
-    
-    public void damaged(){
-        this.health--;
+
+    @Override
+    public void handleDeath(GameEngine gameWorld) {
+
+    }
+
+    public IntegerProperty getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health.set(health);
+    }
+
+    public void damaged() {
+        this.health.set(this.health.get() - 1);
     }
 
     public boolean iswPressed() {

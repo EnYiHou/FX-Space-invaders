@@ -1,5 +1,6 @@
 package edu.vanier.ufo.engine;
 
+import edu.vanier.ufo.game.Invader;
 import java.util.*;
 
 /**
@@ -30,8 +31,11 @@ public class SpriteManager {
      */
     private final static Set<Sprite> spritesToBeRemoved = new HashSet<>();
 
+    private final static List<Invader> invaders = new ArrayList<>();
+
     /**
      * Get the list of sprites.
+     *
      * @return a list of sprites.
      */
     public List<Sprite> getAllSprites() {
@@ -43,7 +47,7 @@ public class SpriteManager {
      *
      * @param inSprites
      */
-    public void addSprites(Sprite... inSprites) {        
+    public void addSprites(Sprite... inSprites) {
         sprites.addAll(Arrays.asList(inSprites));
     }
 
@@ -93,7 +97,6 @@ public class SpriteManager {
      * Clears the list of sprite objects in the collision check collection
      * (CHECK_COLLISION_LIST).
      */
-    
     public void resetCollisionsToCheck() {
         collisionList.clear();
         collisionList.addAll(sprites);
@@ -112,4 +115,18 @@ public class SpriteManager {
         // reset the clean up sprites
         spritesToBeRemoved.clear();
     }
+
+    public void addInvader(Invader a) {
+        invaders.add(a);
+    }
+
+    public void removeInvader(Invader a) {
+        invaders.remove(a);
+    }
+
+    public static List<Invader> getInvaders() {
+        return invaders;
+    }
+
+
 }

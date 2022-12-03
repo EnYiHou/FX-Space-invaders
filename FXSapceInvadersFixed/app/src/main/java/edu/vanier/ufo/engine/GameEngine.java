@@ -61,11 +61,10 @@ public abstract class GameEngine {
     private final SpriteManager spriteManager;
 
     private final SoundManager soundManager;
-    
-    
+
     /*
     * User's score
-    */
+     */
     private IntegerProperty gameScore = new SimpleIntegerProperty(0);
 
     /**
@@ -79,7 +78,7 @@ public abstract class GameEngine {
         framesPerSecond = fps;
         windowTitle = title;
         spriteManager = new SpriteManager();
-        soundManager = new SoundManager(3);
+        soundManager = new SoundManager(10);
         // create and set timeline for the game loop
         buildAndSetGameLoop();
     }
@@ -97,6 +96,9 @@ public abstract class GameEngine {
             checkCollisions();
             // removed dead sprites.
             cleanupSprites();
+
+            detectVictory();
+
         };
         final KeyFrame gameFrame = new KeyFrame(frameDuration, onFinished);
         // sets the game world's game loop (Timeline)
@@ -151,19 +153,36 @@ public abstract class GameEngine {
 
                     Shape intersect = Shape.intersect(spriteA.getCollidingNode(), spriteB.getCollidingNode());
                     if (spriteA instanceof Missile) {
-                        if (!(spriteB instanceof Ship) && !(spriteB instanceof Missile)) {
+                        if ((spriteB instanceof Invader)) {
 
-                            ((Missile) ((Missile) spriteA)).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
-                            ((Atom) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
-                            getSpriteManager().addSpritesToBeRemoved(spriteA, spriteB);
+                            Missile missile = ((Missile) spriteA);
+                            Invader invader = ((Invader) spriteB);
+                            missile.implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
+                            invader.setHealth(invader.getHealth().get() - missile.getDamage());
+
+                            if (invader.getHealth().get() < 0) {
+                                getSpriteManager().removeInvader(invader);
+                                invader.implode(this, invader.getCenterX(), invader.getCenterY());
+                                getSpriteManager().addSpritesToBeRemoved(invader);
+                                gameScore.set(gameScore.get() + invader.getPoint());
+
+                            }
+                            getSpriteManager().addSpritesToBeRemoved(missile);
                         }
                     }
 
                     if (spriteA instanceof Ship) {
                         if ((spriteB instanceof Invader)) {
-                            ((Ship) spriteA).damaged();
+                            Ship ship = ((Ship) spriteA);
+                            ship.damaged();
                             ((Invader) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
                             getSpriteManager().addSpritesToBeRemoved(spriteB);
+                            getSpriteManager().removeInvader((Invader) spriteB);
+
+                            if (ship.getHealth().get() == 0) {
+                                ship.isDead = true;
+                                defeat();
+                            }
                         }
                     }
 
@@ -295,8 +314,24 @@ public abstract class GameEngine {
         this.gameScore.set(gameScore);
     }
 
-    
-    
+    private void detectVictory() {
+        if (SpriteManager.getInvaders().isEmpty()) {
+            victory();
+        }
+
+    }
+
+    private void victory() {
+        System.out.println("Victory!");
+        this.shutdown();
+    }
+
+    private void defeat() {
+        System.out.println("Defeated!");
+        this.shutdown();
+
+    }
+
     /**
      * Stop threads and stop media from playing.
      */

@@ -7,21 +7,21 @@ package edu.vanier.ufo.game;
 public class Missile extends Atom {
     
 
+    private int damage;
+    
     public Missile(String imagePath) {
         super(imagePath);
         
     }
 
-
-    public double getX() {
-
-        return getNode().getLayoutY() + getNode().getBoundsInParent().getWidth() / 2;
-
+    public int getDamage() {
+        return damage;
     }
 
-    public double getY() {
-
-        return getNode().getLayoutY() + getNode().getBoundsInParent().getWidth() / 2;
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
+
+
 
 }

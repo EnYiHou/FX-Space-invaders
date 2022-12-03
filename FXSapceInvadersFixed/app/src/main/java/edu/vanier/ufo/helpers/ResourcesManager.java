@@ -17,43 +17,44 @@ public class ResourcesManager {
     private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "images/";
     private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "sounds/";
     private static final String VIDEOS_FOLDER = RESOURCES_FOLDER + "videos/";
-      // Title image.
+    private static final String ALLY_IMAGES = IMAGES_FOLDER + "ally/";
+    private static final String ALLY_SHIP_IMAGES = ALLY_IMAGES + "ship/";
+    private static final String ALLY_MISSILE_IMAGES = ALLY_IMAGES + "missile/";
+    private static final String ENEMY_IMAGES = IMAGES_FOLDER + "enemy/";
+
+    // Title image.
     public static final String TITLE = IMAGES_FOLDER + "title.jpg";
-    
-    // Ship images.
-    public static final String SPACE_SHIP = IMAGES_FOLDER + "spiked ship.png";
-    public static final String SPACE_STAR_SHIP = IMAGES_FOLDER + "starship.png";
-    public static final String SPACE_TANK = IMAGES_FOLDER + "tank.png";
+
+    // Ally images.
+    public static final String SPACE_SHIP1 = ALLY_SHIP_IMAGES + "level1.png";
+    public static final String SPACE_SHIP2 = ALLY_SHIP_IMAGES + "level2.png";
+    public static final String SPACE_SHIP3 = ALLY_SHIP_IMAGES + "level3.png";
+    public static final String HEART = ALLY_IMAGES + "heart.png";
+
+    // Enemy Images.
+    public static final String BOSS = ENEMY_IMAGES + "boss.png";
+    public static final String ENEMY1 = ENEMY_IMAGES + "enemy1.png";
+    public static final String ENEMY2 = ENEMY_IMAGES + "enemy2.png";
+    public static final String ENEMY3 = ENEMY_IMAGES + "enemy3.png";
+
     // Rocket images
-    public static final String ROCKET_SMALL = IMAGES_FOLDER + "rocket.png";
-    public static final String ROCKET_FIRE = IMAGES_FOLDER + "missile.png";
+    public static final String ROCKET_HUGE = ALLY_MISSILE_IMAGES + "huge.png";
+    public static final String ROCKET_MEDIUM = ALLY_MISSILE_IMAGES + "medium.png";
+    public static final String ROCKET_NORMAL = ALLY_MISSILE_IMAGES + "normal.png";
+    public static final String ROCKET_ULTIMATE = ALLY_MISSILE_IMAGES + "ultimate.png";
+
     // Collision gif
     public static final String ROCKET_EXPLOSION = IMAGES_FOLDER + "explosion.gif";
     // Trailer Video
     public static final String TRAILER_VIDEO = VIDEOS_FOLDER + "Trailer.mp4";
-
-    // Invader sprites.
-    public static final String INVADER_LARGE_SHIP = IMAGES_FOLDER + "large_invader_b.png";
-    public static final String INVADER_SMALL_SHIP = IMAGES_FOLDER + "small_invader_b.png";
-    public static final String INVADER_UFO = IMAGES_FOLDER + "ufo.png";
-    public static final String INVADER_CHICKEN = IMAGES_FOLDER + "rounded-chicken.png";
-    public static final String INVADER_BEE = IMAGES_FOLDER + "small-bee.png";
-    public static final String INVADER_SCI_FI = IMAGES_FOLDER + "sci-fi.png";
-
-    // Sound effect files
-    public static final String SOUND_LASER = SOUNDS_FOLDER + "laser_2.mp3";
-    //public static final String SOUND_LASER = SOUNDS_FOLDER + "alienMove2.wav";    
-
+    
+    //Sound source
+    public static final String EXPLOSION_SOUND = SOUNDS_FOLDER + "explosion.ogg";
+    
+    
     public static final String[] INADER_SPRITES_PATH = {
-        INVADER_UFO, INVADER_CHICKEN, INVADER_BEE, INVADER_SCI_FI
+        BOSS,ENEMY1,ENEMY2,ENEMY3
     };
 
-//    public static final String ROCKET_SMALL = IMAGES_FOLDER + "rocket.png";
-    public static HashMap<Integer, String> getInvaderSprites() {
-        HashMap<Integer, String> invaders = new HashMap<Integer, String>();
-        invaders.put(1, ResourcesManager.IMAGES_FOLDER + "large_invader_b.png");
-        invaders.put(2, ResourcesManager.IMAGES_FOLDER + "small_invader_b.png");
-        return invaders;
-    }
 
 }

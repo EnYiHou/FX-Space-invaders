@@ -2,18 +2,12 @@ package edu.vanier.ufo.game;
 
 import edu.vanier.ufo.engine.GameEngine;
 import edu.vanier.ufo.engine.Sprite;
-import edu.vanier.ufo.engine.SpriteManager;
 import edu.vanier.ufo.helpers.ResourcesManager;
-import javafx.animation.FadeTransition;
-import javafx.event.ActionEvent;
-import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.util.Duration;
 
 /**
  * A spherical looking object (Atom) with a random radius, color, and velocity.
@@ -28,6 +22,8 @@ public class Atom extends Sprite {
 
     private Group flipBook = new Group();
     private int durationCounter = 0;
+    private ImageView view; 
+    Circle hitBounds;
 
     /**
      * Constructor will create a optionally create a gradient fill circle shape.
@@ -39,17 +35,18 @@ public class Atom extends Sprite {
         ImageView newAtom = new ImageView();
         Image shipImage = new Image(imagePath);
         newAtom.setImage(shipImage);
+        this.view = newAtom;
 
         flipBook.getChildren().add(newAtom);
         setNode(flipBook);
         double hZoneCenterX = flipBook.getBoundsInLocal().getWidth() / 2;
         double hZoneCenterY = flipBook.getBoundsInLocal().getHeight() / 2;
 
-        Circle hitBounds = new Circle();
+        hitBounds = new Circle();
         hitBounds.setCenterX(hZoneCenterX);
         hitBounds.setCenterY(hZoneCenterY);
-        hitBounds.setRadius(30);
-        hitBounds.setOpacity(0);
+        hitBounds.setRadius(Math.max(flipBook.getBoundsInLocal().getWidth()/2, flipBook.getBoundsInLocal().getHeight()/2));
+        hitBounds.setOpacity(0.5);
         flipBook.getChildren().add(hitBounds);
         setCollidingNode(hitBounds);
         setOriginalCollidingNode(hitBounds);
@@ -84,17 +81,16 @@ public class Atom extends Sprite {
         Node currentNode = getNode();
         isDead = true;
 
-        Image exploisionImage = new Image(ResourcesManager.ROCKET_EXPLOSION, 150d, 150d, true, true);
-        ImageView explosionAnimation = new ImageView(exploisionImage);
+        Image explosionImage = new Image(ResourcesManager.ROCKET_EXPLOSION, 150d, 150d, true, true);
+        ImageView explosionAnimation = new ImageView(explosionImage);
         Group group = new Group(explosionAnimation);
+        
+        
         gameWorld.getSceneNodes().getChildren().remove(currentNode);
         gameWorld.getSceneNodes().getChildren().add(group);
-        group.setLayoutX(xCoord- exploisionImage.getWidth() / 2);
-        group.setLayoutY(yCoord - exploisionImage.getHeight() / 2);
-        
-        if(this instanceof Invader){
-            gameWorld.setGameScore(gameWorld.getGameScore().get() + ((Invader)this).getPoint()+3);
-        }
+        group.setLayoutX(xCoord- explosionImage.getWidth() / 2);
+        group.setLayoutY(yCoord - explosionImage.getHeight() / 2);
+       
 
     }
 
@@ -111,7 +107,27 @@ public class Atom extends Sprite {
         return durationCounter;
     }
 
+    public ImageView getView() {
+        return view;
+    }
+
+    public void setView(Image view) {
+        this.view.setImage(view);
+    }
+
+    public Circle getHitBounds() {
+        return hitBounds;
+    }
+
+    public void setHitBounds(Circle hitBounds) {
+        this.hitBounds = hitBounds;
+    }
+
+    
+    
     public void setDurationCounter(int durationCounter) {
         this.durationCounter = durationCounter;
     }
 }
+
+
