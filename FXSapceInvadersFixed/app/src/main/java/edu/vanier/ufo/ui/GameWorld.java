@@ -12,19 +12,27 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 /**
  * This is a simple game world simulating a bunch of spheres looking like atomic
@@ -39,6 +47,8 @@ public class GameWorld extends GameEngine {
 
     // Randomizer for later use
     private static Random randomizer = new Random();
+
+    private static Timer timer = new Timer();
 
     /*
     Number of generated Invaders
@@ -94,15 +104,14 @@ public class GameWorld extends GameEngine {
         primaryStage.setTitle(getWindowTitle());
 
         //primary stage limit size
-        primaryStage.setMinWidth(700);
+        primaryStage.setWidth(2000);
         primaryStage.setMinHeight(500);
-        //set Full screen
-        primaryStage.setFullScreen(true);
 
         // Create the scene
         setSceneNodes(new Group());
-        setGameSurface(new Scene(getSceneNodes(), 1400, 900));
+        setGameSurface(new Scene(getSceneNodes(), 1200, 900));
 
+        // Load css stylesheet
         // Generate invaders of 
         generateInvaders();
 
@@ -131,10 +140,15 @@ public class GameWorld extends GameEngine {
 
         loadSoundSource();
 
+        spaceShip.setFireSpeed(300 / level);
+
+        //set Full screen
+        primaryStage.setFullScreen(true);
+
     }
 
     private void loadSoundSource() {
-        getSoundManager().loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION_SOUND));
+        SoundManager.loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION_SOUND));
     }
 
     private Camera createCamera() {
@@ -147,6 +161,7 @@ public class GameWorld extends GameEngine {
 
     private void createHUD(Camera cam) {
 
+        HUD.getStylesheets().add(getClass().getResource("/fontstyle.css").toExternalForm());
         Label gameScoreLabel = new Label();
         Label levelLabel = new Label("Level : ");
         StackPane health = new StackPane();
@@ -154,25 +169,31 @@ public class GameWorld extends GameEngine {
         gameScoreLabel.textProperty()
                 .bind(getGameScore().asString().concat(" Points"));
         gameScoreLabel.setFont(
-                new Font(Application.STYLESHEET_CASPIAN, 20));
-        gameScoreLabel.setTextFill(Color.WHEAT);
+                new Font(Application.STYLESHEET_CASPIAN, 35));
+        gameScoreLabel.setTextFill(Color.WHITE);
 
         levelLabel.setFont(
-                new Font(Application.STYLESHEET_CASPIAN, 20));
-        levelLabel.setTextFill(Color.WHEAT);
+               Font.font("Montserrat", FontWeight.BOLD, 35));
+        levelLabel.setTextFill(Color.WHITE);
 
         levelLabel.setText(levelLabel.getText() + level);
 
         ImageView heartView = new ImageView();
+        heartView.setOpacity(0.6);
         Image heartImage = new Image(ResourcesManager.HEART);
         heartView.setImage(heartImage);
-        Label hearthCount = new Label();
-        hearthCount.setFont(new Font(20));
-        hearthCount.setTextFill(Color.WHEAT);
-        hearthCount.textProperty().bind(spaceShip.getHealth().asString());
+        heartView.setFitHeight(50);
+        heartView.setPreserveRatio(true);
+        Label heartCount = new Label();
+        heartCount.setFont(new Font(20));
+        heartCount.setTextFill(Color.WHITE);
+        heartCount.textProperty().bind(spaceShip.getHealth().asString());
 
-        health.getChildren().addAll(heartView, hearthCount);
+        health.getChildren().addAll(heartView, heartCount);
 
+        HUD.prefWidthProperty().bind(primaryStage.widthProperty());
+        HUD.setPrefHeight(50);
+        HUD.setAlignment(Pos.CENTER);
         HUD.getChildren()
                 .addAll(gameScoreLabel, levelLabel, health);
         HUD.setSpacing(
@@ -181,10 +202,14 @@ public class GameWorld extends GameEngine {
                 .bind(cam.layoutXProperty());
         HUD.layoutYProperty()
                 .bind(cam.layoutYProperty());
-        getSceneNodes()
-                .getChildren().add(HUD);
+
+        getSceneNodes().getChildren().add(HUD);
+        HUD.spacingProperty().bind(primaryStage.widthProperty().divide(5));
+        HUD.layoutXProperty().bind(cam.layoutXProperty());
+        HUD.layoutYProperty().bind(cam.layoutYProperty());
 
         HUD.prefWidthProperty().bind(primaryStage.widthProperty());
+        levelLabel.setRotate(0.000000001);
     }
 
     /**
@@ -217,12 +242,23 @@ public class GameWorld extends GameEngine {
         primaryStage.getScene().setOnMouseClicked((e) -> {
             if (e.getButton() == MouseButton.PRIMARY) {
 
-                Missile missile = spaceShip.fire();
-                getSpriteManager().addSprites(missile);
-                getSceneNodes().getChildren().add(missile.getNode());
-                missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
-                missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
+                if (spaceShip.isCanFire()) {
+                    Missile missile = spaceShip.fire();
+                    getSpriteManager().addSprites(missile);
+                    getSceneNodes().getChildren().add(missile.getNode());
+                    missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
+                    missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
 
+                    spaceShip.setCanFire(false);
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            spaceShip.setCanFire(true);
+                        }
+
+                    }, (long) spaceShip.getFireSpeed());
+
+                }
                 spaceShip.getNode().toFront();
 
             }

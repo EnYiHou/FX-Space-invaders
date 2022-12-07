@@ -1,8 +1,10 @@
 package edu.vanier.ufo.game;
 
 import edu.vanier.ufo.engine.GameEngine;
+import edu.vanier.ufo.engine.SoundManager;
 import edu.vanier.ufo.engine.Sprite;
 import edu.vanier.ufo.helpers.ResourcesManager;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
@@ -18,7 +20,7 @@ import javafx.scene.shape.Circle;
  */
 public class Atom extends Sprite {
 
-    private static int LIFE_EXPECTENCY = 500;
+    private static int LIFE_EXPECTENCY = 80;
 
     private Group flipBook = new Group();
     private int durationCounter = 0;
@@ -35,6 +37,8 @@ public class Atom extends Sprite {
         ImageView newAtom = new ImageView();
         Image shipImage = new Image(imagePath);
         newAtom.setImage(shipImage);
+        newAtom.setCache(true);
+        newAtom.setCacheHint(CacheHint.SPEED);
         this.view = newAtom;
 
         flipBook.getChildren().add(newAtom);
@@ -46,7 +50,7 @@ public class Atom extends Sprite {
         hitBounds.setCenterX(hZoneCenterX);
         hitBounds.setCenterY(hZoneCenterY);
         hitBounds.setRadius(Math.max(flipBook.getBoundsInLocal().getWidth()/2, flipBook.getBoundsInLocal().getHeight()/2));
-        hitBounds.setOpacity(0.5);
+        hitBounds.setOpacity(0);
         flipBook.getChildren().add(hitBounds);
         setCollidingNode(hitBounds);
         setOriginalCollidingNode(hitBounds);
@@ -91,6 +95,7 @@ public class Atom extends Sprite {
         group.setLayoutX(xCoord- explosionImage.getWidth() / 2);
         group.setLayoutY(yCoord - explosionImage.getHeight() / 2);
        
+        SoundManager.playSound("explosion");
 
     }
 

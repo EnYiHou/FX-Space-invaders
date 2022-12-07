@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
  */
 public class SoundManager {
 
-    ExecutorService soundPool = Executors.newFixedThreadPool(2);
-    Map<String, AudioClip> soundEffectsMap = new HashMap<>();
+    static ExecutorService soundPool = Executors.newFixedThreadPool(2);
+    static Map<String, AudioClip> soundEffectsMap = new HashMap<>();
 
     /**
      * Constructor to create a simple thread pool.
@@ -25,8 +25,8 @@ public class SoundManager {
      * @param numberOfThreads - number of threads to use media players in the
      * map.
      */
-    public SoundManager(int numberOfThreads) {
-        soundPool = Executors.newFixedThreadPool(numberOfThreads);
+    public static void setSoundPoolThread(int numberOfThreads){
+         soundPool = Executors.newFixedThreadPool(numberOfThreads);
     }
 
     /**
@@ -36,7 +36,7 @@ public class SoundManager {
      * @param url - The url location of the media or audio resource. Usually in
      * src/main/resources directory.
      */
-    public void loadSoundEffects(String id, URL url) {
+    public static void loadSoundEffects(String id, URL url) {
         AudioClip sound = new AudioClip(url.toExternalForm());
         soundEffectsMap.put(id, sound);
     }
@@ -46,12 +46,9 @@ public class SoundManager {
      *
      * @param id identifier for a sound to be played.
      */
-    public void playSound(final String id) {
-        Runnable soundPlay = new Runnable() {
-            @Override
-            public void run() {
-                soundEffectsMap.get(id).play();
-            }
+    public static void playSound(final String id) {
+        Runnable soundPlay = () -> {
+            soundEffectsMap.get(id).play();
         };
         soundPool.execute(soundPlay);
     }
@@ -59,7 +56,7 @@ public class SoundManager {
     /**
      * Stop all threads and media players.
      */
-    public void shutdown() {
+    public static void shutdown() {
         soundPool.shutdown();
     }
 

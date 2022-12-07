@@ -41,20 +41,18 @@ public class Ship extends Sprite {
      */
     private KeyCode keyCode;
 
+    private float fireSpeed;
+    
+    private boolean canFire;
+
     /**
      * Turn shields on
      */
     private boolean shieldOn;
 
-    /**
-     * Green shield to be used as collision bounds.
-     */
-    private Circle shield;
+    private boolean shieldAvailable = true;
 
-    /**
-     * A fade effect while the shields are up momentarily
-     */
-    FadeTransition shieldFade;
+    private FadeTransition shieldFade;
 
     /**
      * The collision bounding region for the ship
@@ -67,9 +65,12 @@ public class Ship extends Sprite {
 
     public Ship() {
 
+        canFire = true;
         // Load one image.
         ImageView shipImageView = new ImageView(ResourcesManager.SPACE_SHIP1);
         flipBook.getChildren().add(shipImageView);
+        shipImageView.setCache(true);
+        shipImageView.setCacheHint(CacheHint.SPEED);
 
         // set javafx node to an imagefirstShip.setVisible(true);
         setNode(flipBook);
@@ -121,6 +122,8 @@ public class Ship extends Sprite {
             hitBounds.setCenterX(getCenterX());
             hitBounds.setCenterY(getCenterY());
             hitBounds.setOpacity(0);
+            hitBounds.setStroke(Color.AQUA);
+            hitBounds.setFill(Color.CHARTREUSE);
             hitBounds.setRadius(50);
             flipBook.getChildren().add(hitBounds);
             setCollidingNode(hitBounds);
@@ -229,46 +232,21 @@ public class Ship extends Sprite {
     }
 
     public void shieldToggle() {
-        if (shield == null) {
-
-            double x = getNode().getBoundsInLocal().getWidth() / 2;
-            double y = getNode().getBoundsInLocal().getHeight() / 2;
+        if (collidingNode.getOpacity() == 0) {
 
             // add shield
-            shield = new Circle();
-            shield.setRadius(60);
-            shield.setStrokeWidth(5);
-            shield.setStroke(Color.LIMEGREEN);
-            shield.setCenterX(x);
-            shield.setCenterY(y);
-            shield.setOpacity(.70);
-            setCollidingNode(shield);
-            //--
-            shieldFade = new FadeTransition();
-            shieldFade.setFromValue(1);
-            shieldFade.setToValue(.40);
-            shieldFade.setDuration(Duration.millis(1000));
-            shieldFade.setCycleCount(12);
-            shieldFade.setAutoReverse(true);
-            shieldFade.setNode(shield);
+            this.collidingNode.setOpacity(0.5);
+
+            shieldFade = new FadeTransition(Duration.seconds(5), this.collidingNode);
+            shieldFade.setByValue(-0.4);
             shieldFade.setOnFinished((ActionEvent actionEvent) -> {
                 shieldOn = false;
-                flipBook.getChildren().remove(shield);
-                shieldFade.stop();
-                setCollidingNode(hitBounds);
+                collidingNode.setOpacity(0);
             });
             shieldFade.playFromStart();
+            shieldFade.setCycleCount(7);
+            shieldOn = true;
 
-        }
-        shieldOn = !shieldOn;
-        if (shieldOn) {
-            setCollidingNode(shield);
-            flipBook.getChildren().add(0, shield);
-            shieldFade.playFromStart();
-        } else {
-            flipBook.getChildren().remove(shield);
-            shieldFade.stop();
-            setCollidingNode(hitBounds);
         }
     }
 
@@ -321,4 +299,45 @@ public class Ship extends Sprite {
         this.dPressed = dPressed;
     }
 
+    public boolean isShieldOn() {
+        return shieldOn;
+    }
+
+    public void setShieldOn(boolean shieldOn) {
+        this.shieldOn = shieldOn;
+    }
+
+    public FadeTransition getShieldFade() {
+        return shieldFade;
+    }
+
+    public void setShieldFade(FadeTransition shieldFade) {
+        this.shieldFade = shieldFade;
+    }
+
+    public float getFireSpeed() {
+        return fireSpeed;
+    }
+
+    public void setFireSpeed(float fireSpeed) {
+        this.fireSpeed = fireSpeed;
+    }
+
+    public boolean isShieldAvailable() {
+        return shieldAvailable;
+    }
+
+    public void setShieldAvailable(boolean shieldAvailable) {
+        this.shieldAvailable = shieldAvailable;
+    }
+
+    public boolean isCanFire() {
+        return canFire;
+    }
+
+    public void setCanFire(boolean canFire) {
+        this.canFire = canFire;
+    }
+
+    
 }

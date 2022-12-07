@@ -84,12 +84,13 @@ public class SpaceInvadersApp extends Application {
         
         optionsBox.getChildren().addAll( playBtn, shopBtn);
         
+        
         primaryStage.show();
         mediaPlayer.play();
         
         playBtn.setOnAction((e) -> {
             
-            gameWorld = new GameWorld(ResourcesManager.FRAMES_PER_SECOND, "JavaFX Space Invaders", 3);
+            gameWorld = new GameWorld(ResourcesManager.FRAMES_PER_SECOND, "JavaFX Space Invaders", 1);
             // Setup title, scene, stats, controls, and actors.
             gameWorld.initialize(primaryStage);
             // kick off the game loop

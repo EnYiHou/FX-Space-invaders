@@ -17,6 +17,7 @@ public class ResourcesManager {
     private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "images/";
     private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "sounds/";
     private static final String VIDEOS_FOLDER = RESOURCES_FOLDER + "videos/";
+    private static final String STYLESHEET_FOLDER = RESOURCES_FOLDER + "stylesheet/";
     private static final String ALLY_IMAGES = IMAGES_FOLDER + "ally/";
     private static final String ALLY_SHIP_IMAGES = ALLY_IMAGES + "ship/";
     private static final String ALLY_MISSILE_IMAGES = ALLY_IMAGES + "missile/";
@@ -47,14 +48,15 @@ public class ResourcesManager {
     public static final String ROCKET_EXPLOSION = IMAGES_FOLDER + "explosion.gif";
     // Trailer Video
     public static final String TRAILER_VIDEO = VIDEOS_FOLDER + "Trailer.mp4";
-    
-    //Sound source
-    public static final String EXPLOSION_SOUND = SOUNDS_FOLDER + "explosion.ogg";
-    
-    
-    public static final String[] INADER_SPRITES_PATH = {
-        BOSS,ENEMY1,ENEMY2,ENEMY3
-    };
 
+    // Sound source
+    public static final String EXPLOSION_SOUND = SOUNDS_FOLDER + "explosion.mp3";
+
+    // Style sheet
+    public static final String STYLESHEET = STYLESHEET_FOLDER + "stylesheet.css";
+
+    public static final String[] INADER_SPRITES_PATH = {
+        BOSS, ENEMY1, ENEMY2, ENEMY3
+    };
 
 }

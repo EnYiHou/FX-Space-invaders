@@ -1,11 +1,11 @@
 package edu.vanier.ufo.engine;
 
-import edu.vanier.ufo.game.Atom;
 import edu.vanier.ufo.game.Invader;
 import edu.vanier.ufo.game.Missile;
 import edu.vanier.ufo.game.Ship;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -13,7 +13,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -36,10 +43,14 @@ public abstract class GameEngine {
      * The JavaFX Scene as the game surface
      */
     private Scene gameSurface;
+
+    /*
+    * The JavaFX Game Screen
+     */
     /**
      * All nodes to be displayed in the game window.
      */
-    private Group sceneNodes;
+    private Group sceneNode;
     /**
      * The game loop using JavaFX's <code>Timeline</code> API.
      */
@@ -60,8 +71,6 @@ public abstract class GameEngine {
      */
     private final SpriteManager spriteManager;
 
-    private final SoundManager soundManager;
-
     /*
     * User's score
      */
@@ -78,7 +87,7 @@ public abstract class GameEngine {
         framesPerSecond = fps;
         windowTitle = title;
         spriteManager = new SpriteManager();
-        soundManager = new SoundManager(10);
+        SoundManager.setSoundPoolThread(10);
         // create and set timeline for the game loop
         buildAndSetGameLoop();
     }
@@ -96,8 +105,6 @@ public abstract class GameEngine {
             checkCollisions();
             // removed dead sprites.
             cleanupSprites();
-
-            detectVictory();
 
         };
         final KeyFrame gameFrame = new KeyFrame(frameDuration, onFinished);
@@ -165,8 +172,12 @@ public abstract class GameEngine {
                                 invader.implode(this, invader.getCenterX(), invader.getCenterY());
                                 getSpriteManager().addSpritesToBeRemoved(invader);
                                 gameScore.set(gameScore.get() + invader.getPoint());
+                                if (SpriteManager.getInvaders().isEmpty()) {
+                                    victory();
+                                }
 
                             }
+
                             getSpriteManager().addSpritesToBeRemoved(missile);
                         }
                     }
@@ -174,7 +185,14 @@ public abstract class GameEngine {
                     if (spriteA instanceof Ship) {
                         if ((spriteB instanceof Invader)) {
                             Ship ship = ((Ship) spriteA);
-                            ship.damaged();
+                            if (!ship.isShieldOn()) {
+                                ship.damaged();
+                            } else {
+                                ship.setShieldOn(false);
+                                ship.getShieldFade().jumpTo(ship.getShieldFade().getDuration());
+                                ship.collidingNode.setOpacity(0);
+
+                            }
                             ((Invader) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
                             getSpriteManager().addSpritesToBeRemoved(spriteB);
                             getSpriteManager().removeInvader((Invader) spriteB);
@@ -227,6 +245,14 @@ public abstract class GameEngine {
      */
     public String getWindowTitle() {
         return windowTitle;
+    }
+
+    public Group getSceneNodes() {
+        return this.sceneNode;
+    }
+
+    public void setSceneNodes(Group centerPane) {
+        this.sceneNode = centerPane;
     }
 
     /**
@@ -287,10 +313,6 @@ public abstract class GameEngine {
      * @return Group The root containing many child nodes to be displayed into
      * the Scene area.
      */
-    public Group getSceneNodes() {
-        return sceneNodes;
-    }
-
     /**
      * Sets the JavaFX Group that will hold all JavaFX nodes which are rendered
      * onto the game surface(Scene) is a JavaFX Group object.
@@ -298,14 +320,6 @@ public abstract class GameEngine {
      * @param sceneNodes The root container having many children nodes to be
      * displayed into the Scene area.
      */
-    protected void setSceneNodes(Group sceneNodes) {
-        this.sceneNodes = sceneNodes;
-    }
-
-    protected SoundManager getSoundManager() {
-        return soundManager;
-    }
-
     public IntegerProperty getGameScore() {
         return gameScore;
     }
@@ -314,22 +328,25 @@ public abstract class GameEngine {
         this.gameScore.set(gameScore);
     }
 
-    private void detectVictory() {
-        if (SpriteManager.getInvaders().isEmpty()) {
-            victory();
-        }
-
-    }
-
     private void victory() {
-        System.out.println("Victory!");
+
+     
+       
         this.shutdown();
     }
 
     private void defeat() {
-        System.out.println("Defeated!");
+     
         this.shutdown();
+    }
 
+    private Pane victoryScreen() {
+
+        Pane pane = new Pane();
+
+        pane.prefWidthProperty().bind(gameScore);
+
+        return pane;
     }
 
     /**
@@ -338,6 +355,6 @@ public abstract class GameEngine {
     public void shutdown() {
         // Stop the game's animation.
         getGameLoop().stop();
-        getSoundManager().shutdown();
+        SoundManager.shutdown();
     }
 }
