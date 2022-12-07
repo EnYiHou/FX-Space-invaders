@@ -104,7 +104,7 @@ public class GameWorld extends GameEngine {
         primaryStage.setTitle(getWindowTitle());
 
         //primary stage limit size
-        primaryStage.setWidth(2000);
+        primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(500);
 
         // Create the scene
@@ -161,7 +161,7 @@ public class GameWorld extends GameEngine {
 
     private void createHUD(Camera cam) {
 
-        HUD.getStylesheets().add(getClass().getResource("/fontstyle.css").toExternalForm());
+        //HUD.getStylesheets().add(getClass().getResource("/fontstyle.css").toExternalForm());
         Label gameScoreLabel = new Label();
         Label levelLabel = new Label("Level : ");
         StackPane health = new StackPane();
