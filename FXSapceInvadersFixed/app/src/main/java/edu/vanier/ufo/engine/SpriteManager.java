@@ -111,6 +111,7 @@ public class SpriteManager {
 
         // remove from actors list
         sprites.removeAll(spritesToBeRemoved);
+        
 
         // reset the clean up sprites
         spritesToBeRemoved.clear();
@@ -128,5 +129,11 @@ public class SpriteManager {
         return invaders;
     }
 
+    public  void clear(){
+       invaders.clear();
+       sprites.clear();
+       collisionList.clear();
+       spritesToBeRemoved.clear();
+    }
 
 }

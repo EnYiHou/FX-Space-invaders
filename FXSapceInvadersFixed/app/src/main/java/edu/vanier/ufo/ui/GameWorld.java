@@ -86,7 +86,7 @@ public class GameWorld extends GameEngine {
     public GameWorld(int fps, String title, int level) {
         super(fps, title);
         this.level = level;
-        this.numberOfInvaders = 5 * this.level;
+        this.numberOfInvaders = 5 + 2 * this.level;
 
     }
 
@@ -109,7 +109,7 @@ public class GameWorld extends GameEngine {
 
         // Create the scene
         setSceneNodes(new Group());
-        setGameSurface(new Scene(getSceneNodes(), 1200, 900));
+        setGameSurface(new Scene(getSceneNodes(), 1800, 1800));
 
         // Load css stylesheet
         // Generate invaders of 
@@ -135,6 +135,7 @@ public class GameWorld extends GameEngine {
         // Setup Game input
         setupInput(primaryStage);
 
+        getSpriteManager().cleanupSprites();
         getSpriteManager().addSprites(spaceShip);
         getSceneNodes().getChildren().add(spaceShip.getNode());
 
@@ -148,7 +149,11 @@ public class GameWorld extends GameEngine {
     }
 
     private void loadSoundSource() {
-        SoundManager.loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION_SOUND));
+        SoundManager.loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION));
+        SoundManager.loadSoundEffects("laser", getClass().getClassLoader().getResource(ResourcesManager.LASER));
+        SoundManager.loadSoundEffects("win", getClass().getClassLoader().getResource(ResourcesManager.WIN));
+        SoundManager.loadSoundEffects("rocket", getClass().getClassLoader().getResource(ResourcesManager.ROCKET));
+
     }
 
     private Camera createCamera() {
@@ -173,7 +178,7 @@ public class GameWorld extends GameEngine {
         gameScoreLabel.setTextFill(Color.WHITE);
 
         levelLabel.setFont(
-               Font.font("Montserrat", FontWeight.BOLD, 35));
+                Font.font("Montserrat", FontWeight.BOLD, 35));
         levelLabel.setTextFill(Color.WHITE);
 
         levelLabel.setText(levelLabel.getText() + level);
@@ -218,6 +223,7 @@ public class GameWorld extends GameEngine {
      * @param primaryStage The primary stage (app window).
      */
     private void setupInput(Stage primaryStage) {
+        GameWorld world = this;
 
         spaceShip.getNode().rotateProperty().bind(Bindings.createDoubleBinding(() -> {
 
@@ -228,75 +234,83 @@ public class GameWorld extends GameEngine {
         }, mouseX, mouseY, spaceShip.getNode().layoutXProperty(), spaceShip.getNode().layoutYProperty()));
 
         primaryStage.getScene().setOnMouseMoved((event) -> {
-            mouseX.set(event.getX());
-            mouseY.set(event.getY());
+
+            if (!world.isFinished()) {
+                mouseX.set(event.getX());
+                mouseY.set(event.getY());
+            }
 
         });
 
         primaryStage.getScene().setOnMouseDragged((event) -> {
-            mouseX.set(event.getX());
-            mouseY.set(event.getY());
-
+            if (!world.isFinished()) {
+                mouseX.set(event.getX());
+                mouseY.set(event.getY());
+            }
         });
 
         primaryStage.getScene().setOnMouseClicked((e) -> {
             if (e.getButton() == MouseButton.PRIMARY) {
 
-                if (spaceShip.isCanFire()) {
-                    Missile missile = spaceShip.fire();
-                    getSpriteManager().addSprites(missile);
-                    getSceneNodes().getChildren().add(missile.getNode());
-                    missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
-                    missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
+                if (!world.isFinished()) {
+                    if (spaceShip.isCanFire()) {
+                        Missile missile = spaceShip.fire();
+                        getSpriteManager().addSprites(missile);
+                        getSceneNodes().getChildren().add(missile.getNode());
+                        missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
+                        missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
 
-                    spaceShip.setCanFire(false);
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            spaceShip.setCanFire(true);
-                        }
+                        spaceShip.setCanFire(false);
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                spaceShip.setCanFire(true);
+                            }
 
-                    }, (long) spaceShip.getFireSpeed());
+                        }, (long) spaceShip.getFireSpeed());
+
+                    }
+                    spaceShip.getNode().toFront();
 
                 }
-                spaceShip.getNode().toFront();
-
             }
         });
 
         primaryStage.getScene().setOnKeyPressed((var e) -> {
-            if (e.getCode() == KeyCode.SPACE) {
-                spaceShip.shieldToggle();
-                return;
-            }
 
-            if (e.getCode() == KeyCode.DIGIT1) {
-                spaceShip.changeWeapon(e.getCode());
-            }
-            if (e.getCode() == KeyCode.DIGIT2) {
-                spaceShip.changeWeapon(e.getCode());
-            }
-            if (e.getCode() == KeyCode.DIGIT3) {
-                spaceShip.changeWeapon(e.getCode());
-            }
-            if (e.getCode() == KeyCode.DIGIT4) {
-                spaceShip.changeWeapon(e.getCode());
-            }
+            if (!world.isFinished()) {
+                if (e.getCode() == KeyCode.SPACE) {
+                    spaceShip.shieldToggle();
+                    return;
+                }
 
-            if (e.getCode() == KeyCode.W) {
-                spaceShip.setwPressed(true);
+                if (e.getCode() == KeyCode.DIGIT1) {
+                    spaceShip.changeWeapon(e.getCode());
+                }
+                if (e.getCode() == KeyCode.DIGIT2) {
+                    spaceShip.changeWeapon(e.getCode());
+                }
+                if (e.getCode() == KeyCode.DIGIT3) {
+                    spaceShip.changeWeapon(e.getCode());
+                }
+                if (e.getCode() == KeyCode.DIGIT4) {
+                    spaceShip.changeWeapon(e.getCode());
+                }
 
-            }
-            if (e.getCode() == KeyCode.A) {
-                spaceShip.setaPressed(true);
-            }
-            if (e.getCode() == KeyCode.S) {
-                spaceShip.setsPressed(true);
-            }
-            if (e.getCode() == KeyCode.D) {
-                spaceShip.setdPressed(true);
-            }
+                if (e.getCode() == KeyCode.W) {
+                    spaceShip.setwPressed(true);
 
+                }
+                if (e.getCode() == KeyCode.A) {
+                    spaceShip.setaPressed(true);
+                }
+                if (e.getCode() == KeyCode.S) {
+                    spaceShip.setsPressed(true);
+                }
+                if (e.getCode() == KeyCode.D) {
+                    spaceShip.setdPressed(true);
+                }
+            }
         });
 
         primaryStage.getScene().setOnKeyReleased((var e) -> {
@@ -319,26 +333,23 @@ public class GameWorld extends GameEngine {
     }
 
     private void generateInvaders() {
-        double percentageEnemy1 = 0.5;
-        double percentageEnemy2 = 0.33;
-        double percentageEnemy3 = 0.12;
-        double percentageBoss = 0.05;
+
         for (int i = 0; i < numberOfInvaders; i++) {
 
             Invader invader;
             double percentage = Math.random();
 
-            if (percentage < percentageBoss) {
+            if (level == 4) {
                 invader = new Invader(spaceShip, ResourcesManager.BOSS, level);
                 invader.setPoint(500);
                 invader.setHealth(2000);
 
-            } else if (percentage < percentageEnemy3) {
+            } else if (level == 3) {
                 invader = new Invader(spaceShip, ResourcesManager.ENEMY3, level);
                 invader.setPoint(100);
                 invader.setHealth(1000);
 
-            } else if (percentage < percentageEnemy2) {
+            } else if (level == 2) {
                 invader = new Invader(spaceShip, ResourcesManager.ENEMY2, level);
                 invader.setPoint(50);
                 invader.setHealth(500);
@@ -388,7 +399,9 @@ public class GameWorld extends GameEngine {
 
         handleOutOfMap(sprite);
 
-        sprite.update();
+        if (!this.isFinished()) {
+            sprite.update();
+        }
         if (sprite instanceof Missile) {
             removeMissiles((Missile) sprite);
         }

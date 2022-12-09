@@ -17,6 +17,9 @@ public class ResourcesManager {
     private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "images/";
     private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "sounds/";
     private static final String VIDEOS_FOLDER = RESOURCES_FOLDER + "videos/";
+    private static final String FXML_FOLDER = RESOURCES_FOLDER + "fxml/";
+
+    private static final String LEVEL_IMAGES = IMAGES_FOLDER + "levels/";
     private static final String STYLESHEET_FOLDER = RESOURCES_FOLDER + "stylesheet/";
     private static final String ALLY_IMAGES = IMAGES_FOLDER + "ally/";
     private static final String ALLY_SHIP_IMAGES = ALLY_IMAGES + "ship/";
@@ -25,6 +28,12 @@ public class ResourcesManager {
 
     // Title image.
     public static final String TITLE = IMAGES_FOLDER + "title.jpg";
+
+    // Level images.
+    public static final String ENTRY_LEVEL = LEVEL_IMAGES + "entry.png";
+    public static final String BASIC_LEVEL = LEVEL_IMAGES + "basic.png";
+    public static final String INTERMEDIATE_LEVEL = LEVEL_IMAGES + "intermediate.png";
+    public static final String ADVANCED_LEVEL = LEVEL_IMAGES + "advanced.png";
 
     // Ally images.
     public static final String SPACE_SHIP1 = ALLY_SHIP_IMAGES + "level1.png";
@@ -46,17 +55,20 @@ public class ResourcesManager {
 
     // Collision gif
     public static final String ROCKET_EXPLOSION = IMAGES_FOLDER + "explosion.gif";
-    // Trailer Video
-    public static final String TRAILER_VIDEO = VIDEOS_FOLDER + "Trailer.mp4";
+    // Home Page Contents
+    //public static final String TRAILER_VIDEO = VIDEOS_FOLDER + "Trailer.mp4";
+    public static final String BACKGROUND = IMAGES_FOLDER + "background.jpeg";
 
     // Sound source
-    public static final String EXPLOSION_SOUND = SOUNDS_FOLDER + "explosion.mp3";
+    public static final String EXPLOSION = SOUNDS_FOLDER + "explosion.mp3";
+    public static final String WIN = SOUNDS_FOLDER + "win.wav";
+    public static final String LASER = SOUNDS_FOLDER + "laser.wav";
+    public static final String ROCKET = SOUNDS_FOLDER + "rocket.wav";
 
-    // Style sheet
-    public static final String STYLESHEET = STYLESHEET_FOLDER + "stylesheet.css";
+    // FXML files
+    public static final String HOME_PAGE = FXML_FOLDER + "homgepage.fxml";
+    
 
-    public static final String[] INADER_SPRITES_PATH = {
-        BOSS, ENEMY1, ENEMY2, ENEMY3
-    };
+    public static final String[] LEVELS_LIST = {ENTRY_LEVEL, BASIC_LEVEL, INTERMEDIATE_LEVEL, ADVANCED_LEVEL};
 
 }

@@ -1,6 +1,7 @@
 package edu.vanier.ufo.game;
 
 import edu.vanier.ufo.engine.GameEngine;
+import edu.vanier.ufo.engine.SoundManager;
 import edu.vanier.ufo.helpers.ResourcesManager;
 import edu.vanier.ufo.engine.Sprite;
 import javafx.animation.*;
@@ -42,7 +43,7 @@ public class Ship extends Sprite {
     private KeyCode keyCode;
 
     private float fireSpeed;
-    
+
     private boolean canFire;
 
     /**
@@ -205,18 +206,23 @@ public class Ship extends Sprite {
             fireMissile = new Missile(ResourcesManager.ROCKET_ULTIMATE);
             slowDownAmt = 3f;
             fireMissile.setDamage(500);
+            SoundManager.playSound("rocket");
+
         } else if (KeyCode.DIGIT2 == keyCode) {
             fireMissile = new Missile(ResourcesManager.ROCKET_MEDIUM);
             slowDownAmt = 2.3f;
             fireMissile.setDamage(200);
+            SoundManager.playSound("rocket");
         } else if (KeyCode.DIGIT3 == keyCode) {
             fireMissile = new Missile(ResourcesManager.ROCKET_HUGE);
             slowDownAmt = 5f;
             fireMissile.setDamage(300);
+            SoundManager.playSound("rocket");
         } else {
             fireMissile = new Missile(ResourcesManager.ROCKET_NORMAL);
             slowDownAmt = 3f;
             fireMissile.setDamage(100);
+            SoundManager.playSound("laser");
         }
 
         fireMissile.setVelocityX(this.vX + Math.cos(Math.toRadians(this.getNode().getRotate())) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
@@ -339,5 +345,4 @@ public class Ship extends Sprite {
         this.canFire = canFire;
     }
 
-    
 }

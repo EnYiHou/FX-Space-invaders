@@ -3,6 +3,11 @@ package edu.vanier.ufo.engine;
 import edu.vanier.ufo.game.Invader;
 import edu.vanier.ufo.game.Missile;
 import edu.vanier.ufo.game.Ship;
+import edu.vanier.ufo.helpers.EndPageController;
+import edu.vanier.ufo.helpers.HomePageController;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -11,8 +16,10 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -71,6 +78,7 @@ public abstract class GameEngine {
      */
     private final SpriteManager spriteManager;
 
+    private boolean finished;
     /*
     * User's score
      */
@@ -87,7 +95,8 @@ public abstract class GameEngine {
         framesPerSecond = fps;
         windowTitle = title;
         spriteManager = new SpriteManager();
-        SoundManager.setSoundPoolThread(10);
+        finished = false;
+        SoundManager.setSoundPoolThread(500);
         // create and set timeline for the game loop
         buildAndSetGameLoop();
     }
@@ -98,15 +107,19 @@ public abstract class GameEngine {
     protected final void buildAndSetGameLoop() {
 
         final Duration frameDuration = Duration.millis(1000 / (float) getFramesPerSecond());
+        GameEngine engine = this;
         EventHandler<ActionEvent> onFinished = (event) -> {
-            // update actors
-            updateSprites();
-            // check for collision.
-            checkCollisions();
-            // removed dead sprites.
-            cleanupSprites();
 
+            if (!engine.isFinished()) {
+// update actors
+                updateSprites();
+                // check for collision.
+                checkCollisions();
+                // removed dead sprites.
+                cleanupSprites();
+            }
         };
+
         final KeyFrame gameFrame = new KeyFrame(frameDuration, onFinished);
         // sets the game world's game loop (Timeline)
         Timeline gameLoop = new Timeline(gameFrame);
@@ -196,7 +209,9 @@ public abstract class GameEngine {
                             ((Invader) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
                             getSpriteManager().addSpritesToBeRemoved(spriteB);
                             getSpriteManager().removeInvader((Invader) spriteB);
-
+                            if (SpriteManager.getInvaders().isEmpty()) {
+                                victory();
+                            }
                             if (ship.getHealth().get() == 0) {
                                 ship.isDead = true;
                                 defeat();
@@ -286,6 +301,14 @@ public abstract class GameEngine {
         return spriteManager;
     }
 
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
     /**
      * Returns the JavaFX Scene. This is called the game surface to allow the
      * developer to add JavaFX Node objects onto the Scene.
@@ -330,23 +353,43 @@ public abstract class GameEngine {
 
     private void victory() {
 
-     
-       
-        this.shutdown();
+        {
+            finished = true;
+            SoundManager.playSound("win");
+            finished();
+        }
+
     }
 
     private void defeat() {
-     
-        this.shutdown();
+
+        finished = true;
+        finished();
+
     }
 
-    private Pane victoryScreen() {
+    private void finished() {
 
-        Pane pane = new Pane();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText("End");
+        Stage primaryStage = (Stage) gameSurface.getWindow();
+        primaryStage.setFullScreen(false);
+        GameEngine engine = this;
+        alert.setOnCloseRequest((e) -> {
+            try {
 
-        pane.prefWidthProperty().bind(gameScore);
+                this.shutdown();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
+                loader.setController(new HomePageController());
+                Pane pane = loader.load();
 
-        return pane;
+                primaryStage.setScene(new Scene(pane));
+            } catch (IOException ex) {
+                Logger.getLogger(GameEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        alert.show();
+
     }
 
     /**
@@ -354,7 +397,10 @@ public abstract class GameEngine {
      */
     public void shutdown() {
         // Stop the game's animation.
+        finished = true;
+        getSpriteManager().clear();
         getGameLoop().stop();
         SoundManager.shutdown();
     }
+
 }
