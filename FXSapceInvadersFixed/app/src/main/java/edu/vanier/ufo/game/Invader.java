@@ -4,8 +4,6 @@
  */
 package edu.vanier.ufo.game;
 
-import edu.vanier.ufo.engine.SpriteManager;
-import edu.vanier.ufo.helpers.ResourcesManager;
 import java.util.Random;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

@@ -3,14 +3,12 @@ package edu.vanier.ufo.engine;
 import edu.vanier.ufo.game.Invader;
 import edu.vanier.ufo.game.Missile;
 import edu.vanier.ufo.game.Ship;
-import edu.vanier.ufo.helpers.EndPageController;
 import edu.vanier.ufo.helpers.HomePageController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -20,14 +18,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -356,7 +350,7 @@ public abstract class GameEngine {
         {
             finished = true;
             SoundManager.playSound("win");
-            finished();
+            finished(true);
         }
 
     }
@@ -364,20 +358,23 @@ public abstract class GameEngine {
     private void defeat() {
 
         finished = true;
-        finished();
+        finished(false);
 
     }
 
-    private void finished() {
+    private void finished(boolean victory) {
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setContentText("End");
+        if (victory) {
+            alert.setContentText("Victory!");
+
+        } else {
+            alert.setContentText("Defeat...");
+        }
         Stage primaryStage = (Stage) gameSurface.getWindow();
         primaryStage.setFullScreen(false);
-        GameEngine engine = this;
         alert.setOnCloseRequest((e) -> {
             try {
-
                 this.shutdown();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
                 loader.setController(new HomePageController());
