@@ -4,26 +4,20 @@ import edu.vanier.ufo.game.Invader;
 import edu.vanier.ufo.game.Missile;
 import edu.vanier.ufo.game.Ship;
 import edu.vanier.ufo.helpers.HomePageController;
+import edu.vanier.ufo.ui.GameWorld;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 /**
  * This application demonstrates a JavaFX Game Loop. Shown below are the methods
@@ -51,11 +45,11 @@ public abstract class GameEngine {
     /**
      * All nodes to be displayed in the game window.
      */
-    private Group sceneNode;
+    private Pane sceneNode;
     /**
      * The game loop using JavaFX's <code>Timeline</code> API.
      */
-    private static Timeline gameLoop;
+    private static AnimationTimer gameLoop;
 
     /**
      * Number of frames per second.
@@ -74,9 +68,21 @@ public abstract class GameEngine {
 
     private boolean finished;
     /*
-    * User's score
+     * User's score
      */
-    private IntegerProperty gameScore = new SimpleIntegerProperty(0);
+    protected IntegerProperty gameScore = new SimpleIntegerProperty(0);
+    /*
+     * How many eliminated Invaders
+     */
+    protected IntegerProperty gameProgress = new SimpleIntegerProperty(0);
+
+    /*
+     * Number of invaders
+     */
+    protected int numberOfInvaders;
+    
+    
+    protected MediaPlayer gameMusic;
 
     /**
      * Constructor that is called by the derived class. This will set the frames
@@ -100,24 +106,28 @@ public abstract class GameEngine {
      */
     protected final void buildAndSetGameLoop() {
 
-        final Duration frameDuration = Duration.millis(1000 / (float) getFramesPerSecond());
         GameEngine engine = this;
-        EventHandler<ActionEvent> onFinished = (event) -> {
 
-            if (!engine.isFinished()) {
-// update actors
-                updateSprites();
-                // check for collision.
-                checkCollisions();
-                // removed dead sprites.
-                cleanupSprites();
+        AnimationTimer gameLoop = new AnimationTimer() {
+            private long lastUpdate = 0;
+
+            @Override
+            public void handle(long now) {
+
+                if (now - lastUpdate >= 10_000_000) {
+                    lastUpdate = now;
+                    if (!engine.isFinished()) {
+                        // update actors
+                        updateSprites();
+                        // check for collision.
+                        checkCollisions();
+                        // removed dead sprites.
+                        cleanupSprites();
+                    }
+                }
             }
         };
 
-        final KeyFrame gameFrame = new KeyFrame(frameDuration, onFinished);
-        // sets the game world's game loop (Timeline)
-        Timeline gameLoop = new Timeline(gameFrame);
-        gameLoop.setCycleCount(Animation.INDEFINITE);
         setGameLoop(gameLoop);
     }
 
@@ -134,7 +144,7 @@ public abstract class GameEngine {
      * sprite objects, check for collisions, and cleanup sprite objects.
      */
     public void beginGameLoop() {
-        getGameLoop().play();
+        getGameLoop().start();
     }
 
     /**
@@ -172,19 +182,23 @@ public abstract class GameEngine {
                             Missile missile = ((Missile) spriteA);
                             Invader invader = ((Invader) spriteB);
                             missile.implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
-                            invader.setHealth(invader.getHealth().get() - missile.getDamage());
 
-                            if (invader.getHealth().get() < 0) {
-                                getSpriteManager().removeInvader(invader);
-                                invader.implode(this, invader.getCenterX(), invader.getCenterY());
-                                getSpriteManager().addSpritesToBeRemoved(invader);
-                                gameScore.set(gameScore.get() + invader.getPoint());
-                                if (SpriteManager.getInvaders().isEmpty()) {
-                                    victory();
+                            if (!invader.isIsDead()) {
+                                invader.setHealth(invader.getHealth().get() - missile.getDamage());
+
+                                if (invader.getHealth().get() < 0) {
+                                    getSpriteManager().removeInvader(invader);
+                                    invader.implode(this, invader.getCenterX(), invader.getCenterY());
+                                    getSpriteManager().addSpritesToBeRemoved(invader);
+                                    gameScore.set(gameScore.get() + invader.getPoint());
+                                    gameProgress.set(gameProgress.get() + 1);
+                                    invader.setIsDead(true);
+                                    if (spriteManager.getInvaders().isEmpty()) {
+                                        victory();
+                                    }
+
                                 }
-
                             }
-
                             getSpriteManager().addSpritesToBeRemoved(missile);
                         }
                     }
@@ -203,7 +217,7 @@ public abstract class GameEngine {
                             ((Invader) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
                             getSpriteManager().addSpritesToBeRemoved(spriteB);
                             getSpriteManager().removeInvader((Invader) spriteB);
-                            if (SpriteManager.getInvaders().isEmpty()) {
+                            if (spriteManager.getInvaders().isEmpty()) {
                                 victory();
                             }
                             if (ship.getHealth().get() == 0) {
@@ -215,6 +229,11 @@ public abstract class GameEngine {
 
                 }
             }
+        }
+        if (gameProgress.get() + spriteManager.getInvaders().size() < numberOfInvaders && (spriteManager.getInvaders().size() < 7)) {
+            ((GameWorld) this).spawnInvaders();
+            System.out.println("Spawned a new Invader");
+
         }
     }
 
@@ -256,11 +275,11 @@ public abstract class GameEngine {
         return windowTitle;
     }
 
-    public Group getSceneNodes() {
+    public Pane getSceneNodes() {
         return this.sceneNode;
     }
 
-    public void setSceneNodes(Group centerPane) {
+    public void setSceneNodes(Pane centerPane) {
         this.sceneNode = centerPane;
     }
 
@@ -271,7 +290,7 @@ public abstract class GameEngine {
      * @return Timeline An animation running indefinitely representing the game
      * loop.
      */
-    protected static Timeline getGameLoop() {
+    protected static AnimationTimer getGameLoop() {
         return gameLoop;
     }
 
@@ -281,7 +300,7 @@ public abstract class GameEngine {
      * @param gameLoop Timeline object of an animation running indefinitely
      * representing the game loop.
      */
-    protected static void setGameLoop(Timeline gameLoop) {
+    protected static void setGameLoop(AnimationTimer gameLoop) {
         GameEngine.gameLoop = gameLoop;
     }
 
@@ -364,6 +383,7 @@ public abstract class GameEngine {
 
     private void finished(boolean victory) {
 
+        this.gameMusic.stop();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         if (victory) {
             alert.setContentText("Victory!");

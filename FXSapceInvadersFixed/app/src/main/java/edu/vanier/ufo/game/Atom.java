@@ -38,7 +38,7 @@ public class Atom extends Sprite {
         Image shipImage = new Image(imagePath);
         newAtom.setImage(shipImage);
         newAtom.setCache(true);
-        newAtom.setCacheHint(CacheHint.SPEED);
+        newAtom.setCacheHint(CacheHint.SCALE_AND_ROTATE);
         this.view = newAtom;
 
         flipBook.getChildren().add(newAtom);

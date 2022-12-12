@@ -31,17 +31,22 @@ public class SpaceInvadersApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
         loader.setController(new HomePageController());
         Pane pane = loader.load();
-        
+
+        primaryStage.setOnCloseRequest((e) -> {
+            Platform.exit();
+            System.exit(0);
+        });
+
         primaryStage.setScene(new Scene(pane));
         setStage(primaryStage);
         primaryStage.show();
     }
 
-    private void setStage(Stage stage){
+    private void setStage(Stage stage) {
         stage.setMinHeight(500);
         stage.setMinWidth(650);
     }
-    
+
     @Override
     public void stop() throws Exception {
         Platform.exit();

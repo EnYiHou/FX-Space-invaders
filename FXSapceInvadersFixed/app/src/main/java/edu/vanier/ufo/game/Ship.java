@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -19,18 +18,67 @@ import javafx.util.Duration;
 import javafx.scene.image.ImageView;
 
 /**
- * A spaceship with 32 directions When two atoms collide each will fade and
- * become removed from the scene. The method called implode() implements a fade
- * transition effect.
  *
- * @author cdea
+ * The spaceship object is the user-controlled character of the game.
+ *
+ * @author enyi
  */
 public class Ship extends Sprite {
 
-    private final static double DECCELERATION_CONSTANT = 0.04;
-    private final static double ACCELERATION_CONSTANT = 0.1;
+    /**
+     * Decceleration of the spaceship. It must be lower than the acceleration
+     * constant
+     */
+    private final static double DECCELERATION_CONSTANT = 0.08;
 
-    private final static float MISSILE_THRUST_AMOUNT = 20.3F;
+    /**
+     * Acceleration of the spaceship. It must be higher than the decceleration
+     * constant
+     */
+    private final static double ACCELERATION_CONSTANT = 0.2;
+
+    /**
+     * Speed of the missile.
+     */
+    private final static float MISSILE_THRUST_AMOUNT = 40.3F;
+
+    /**
+     * Speed of shooting. The cooldown of fire is inversely proportional to this
+     * property
+     */
+    private float fireSpeed = 1f;
+    
+    /**
+     * Maximum Angle of shooting bullets. When the spaceship shoots more than 
+     * 1 missile, each missile will have an angle slightly deviated from the center.
+     * This variable determines the maximum angle of deviation from the center
+     */
+    private int maxAngleShooting = 30;
+
+    /**
+     * Boolean of if the spaceship can fire or not.
+     */
+    private boolean canFire;
+
+    /**
+     * Cooldown of the shield after it is activated in milliseconds
+     */
+    private float shieldCoolDown = 15000;
+
+    /**
+     * Boolean of whether the spaceship has a shield on.
+     */
+    private boolean shieldOn;
+
+    /**
+     * Boolean of whether the user can turn on the shield.
+     */
+    private boolean shieldAvailable = true;
+    
+    /**
+     * Fade Transition of the shield to make it looks like it is slowly disappearing with time.
+     */
+    private FadeTransition shieldFade;
 
     /**
      * A group contain all of the ship image view nodes.
@@ -42,38 +90,32 @@ public class Ship extends Sprite {
      */
     private KeyCode keyCode;
 
-    private float fireSpeed;
-
-    private boolean canFire;
-
-    /**
-     * Turn shields on
-     */
-    private boolean shieldOn;
-
-    private boolean shieldAvailable = true;
-
-    private FadeTransition shieldFade;
 
     /**
      * The collision bounding region for the ship
      */
     private Circle hitBounds;
 
+    /**
+     * The remaining health of the spaceship
+     */
     private IntegerProperty health = new SimpleIntegerProperty(3);
-
+    
+    /**
+     * Booleans to tell which direction the spaceship is commanded to go.
+     */
     private boolean wPressed, aPressed, sPressed, dPressed = false;
 
+    
     public Ship() {
 
         canFire = true;
-        // Load one image.
         ImageView shipImageView = new ImageView(ResourcesManager.SPACE_SHIP1);
         flipBook.getChildren().add(shipImageView);
-        shipImageView.setCache(true);
-        shipImageView.setCacheHint(CacheHint.SPEED);
+      
+        flipBook.setCache(true);
+        flipBook.setCacheHint(CacheHint.SCALE_AND_ROTATE);
 
-        // set javafx node to an imagefirstShip.setVisible(true);
         setNode(flipBook);
         initHitZone();
         flipBook.setLayoutX(350);
@@ -96,8 +138,6 @@ public class Ship extends Sprite {
 
         flipBook.getChildren().clear();
 
-        Image shipImage;
-        shipImage = new Image(newShip, true);
         ImageView shipImageView = new ImageView(newShip);
         flipBook.getChildren().add(shipImageView);
         setNode(flipBook);
@@ -138,26 +178,11 @@ public class Ship extends Sprite {
     @Override
     public void update() {
 
-        accelerate();
         deccelerate();
+        accelerate();
 
         getNode().setLayoutX(getNode().getLayoutX() + vX);
         getNode().setLayoutY(getNode().getLayoutY() - vY);
-
-    }
-
-    private void deccelerate() {
-        if (vX > 0) {
-            this.vX = Math.max(this.vX - DECCELERATION_CONSTANT, 0);
-        } else if (vX < 0) {
-            this.vX = Math.min(this.vX + DECCELERATION_CONSTANT, 0);
-        }
-
-        if (vY > 0) {
-            this.vY = Math.max(this.vY - DECCELERATION_CONSTANT, 0);
-        } else if (vY < 0) {
-            this.vY = Math.min(this.vY + DECCELERATION_CONSTANT, 0);
-        }
 
     }
 
@@ -192,6 +217,21 @@ public class Ship extends Sprite {
 
         }
     }
+    
+     private void deccelerate() {
+        if (vX > 0) {
+            this.vX = Math.max(this.vX - DECCELERATION_CONSTANT, 0);
+        } else if (vX < 0) {
+            this.vX = Math.min(this.vX + DECCELERATION_CONSTANT, 0);
+        }
+
+        if (vY > 0) {
+            this.vY = Math.max(this.vY - DECCELERATION_CONSTANT, 0);
+        } else if (vY < 0) {
+            this.vY = Math.min(this.vY + DECCELERATION_CONSTANT, 0);
+        }
+
+    }
 
     /**
      * The center X coordinate of the current visible image. See
@@ -199,7 +239,7 @@ public class Ship extends Sprite {
      *
      * @return The scene or screen X coordinate.
      */
-    public Missile fire() {
+    public Missile fire(int i, int level) {
         Missile fireMissile;
         float slowDownAmt = 0;
         if (KeyCode.DIGIT4 == keyCode) {
@@ -225,10 +265,11 @@ public class Ship extends Sprite {
             SoundManager.playSound("laser");
         }
 
-        fireMissile.setVelocityX(this.vX + Math.cos(Math.toRadians(this.getNode().getRotate())) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
-        fireMissile.setVelocityY(-this.vY + Math.sin(Math.toRadians(this.getNode().getRotate())) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
+       
+        fireMissile.setVelocityX(this.vX + Math.cos(Math.toRadians(this.getNode().getRotate()-(this.maxAngleShooting/2)+(i*((this.maxAngleShooting/(level+1)))))) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
+        fireMissile.setVelocityY(-this.vY + Math.sin(Math.toRadians(this.getNode().getRotate()-(this.maxAngleShooting/2)+(i*((this.maxAngleShooting/(level+1)))))) * (MISSILE_THRUST_AMOUNT - slowDownAmt));
 
-        fireMissile.getNode().setRotate(getNode().getRotate() + 90);
+        fireMissile.getNode().setRotate(this.getNode().getRotate()-(this.maxAngleShooting/2)+(i*((this.maxAngleShooting/(level+1)))) + 90);
 
         return fireMissile;
     }
@@ -329,6 +370,14 @@ public class Ship extends Sprite {
         this.fireSpeed = fireSpeed;
     }
 
+    public float getShieldCoolDown() {
+        return shieldCoolDown;
+    }
+
+    public void setShieldCoolDown(float shieldCoolDown) {
+        this.shieldCoolDown = shieldCoolDown;
+    }
+
     public boolean isShieldAvailable() {
         return shieldAvailable;
     }
@@ -344,5 +393,15 @@ public class Ship extends Sprite {
     public void setCanFire(boolean canFire) {
         this.canFire = canFire;
     }
+
+    public int getMaxAngleShooting() {
+        return maxAngleShooting;
+    }
+
+    public void setMaxAngleShooting(int maxAngleShooting) {
+        this.maxAngleShooting = maxAngleShooting;
+    }
+    
+    
 
 }

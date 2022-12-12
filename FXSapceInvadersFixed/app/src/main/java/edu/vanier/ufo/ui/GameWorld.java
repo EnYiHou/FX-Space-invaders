@@ -3,7 +3,6 @@ package edu.vanier.ufo.ui;
 import edu.vanier.ufo.helpers.ResourcesManager;
 import edu.vanier.ufo.engine.*;
 import edu.vanier.ufo.game.*;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -23,12 +22,10 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -46,9 +43,9 @@ import javafx.scene.text.FontWeight;
 public class GameWorld extends GameEngine {
 
     // Randomizer for later use
-    private static Random randomizer = new Random();
+    private static final Random randomizer = new Random();
 
-    private static Timer timer = new Timer();
+    private static final Timer timer = new Timer();
 
     /*
     Number of generated Invaders
@@ -56,7 +53,6 @@ public class GameWorld extends GameEngine {
      */
     private static int SAFETY_REGION_RADIUS = 2000;
     private int level;
-    private int numberOfInvaders;
 
     private Stage primaryStage;
 
@@ -86,7 +82,7 @@ public class GameWorld extends GameEngine {
     public GameWorld(int fps, String title, int level) {
         super(fps, title);
         this.level = level;
-        this.numberOfInvaders = 5 + 2 * this.level;
+        this.numberOfInvaders = 12 + 3 * this.level;
 
     }
 
@@ -108,13 +104,15 @@ public class GameWorld extends GameEngine {
         primaryStage.setMinHeight(500);
 
         // Create the scene
-        setSceneNodes(new Group());
+        setSceneNodes(new Pane());
         setGameSurface(new Scene(getSceneNodes(), 1800, 1800));
+//        getSceneNodes().setCache(true);
+//        getSceneNodes().setPrefWidth(2000);
+//        getSceneNodes().setCacheHint(CacheHint.SPEED);
+//       
 
         // Load css stylesheet
         // Generate invaders of 
-        generateInvaders();
-
         // Generate Camera
         Camera cam = createCamera();
         getGameSurface().setCamera(cam);
@@ -141,10 +139,10 @@ public class GameWorld extends GameEngine {
 
         loadSoundSource();
 
-        spaceShip.setFireSpeed(300 / level);
-
         //set Full screen
         primaryStage.setFullScreen(true);
+
+        this.gameMusic = SoundManager.playGameMusic("level" + String.valueOf(this.level));
 
     }
 
@@ -153,6 +151,11 @@ public class GameWorld extends GameEngine {
         SoundManager.loadSoundEffects("laser", getClass().getClassLoader().getResource(ResourcesManager.LASER));
         SoundManager.loadSoundEffects("win", getClass().getClassLoader().getResource(ResourcesManager.WIN));
         SoundManager.loadSoundEffects("rocket", getClass().getClassLoader().getResource(ResourcesManager.ROCKET));
+
+        SoundManager.loadGameMusic("level1", getClass().getClassLoader().getResource(ResourcesManager.LEVEL1));
+        SoundManager.loadGameMusic("level2", getClass().getClassLoader().getResource(ResourcesManager.LEVEL2));
+        SoundManager.loadGameMusic("level3", getClass().getClassLoader().getResource(ResourcesManager.LEVEL3));
+        SoundManager.loadGameMusic("level4", getClass().getClassLoader().getResource(ResourcesManager.LEVEL4));
 
     }
 
@@ -169,17 +172,23 @@ public class GameWorld extends GameEngine {
         //HUD.getStylesheets().add(getClass().getResource("/fontstyle.css").toExternalForm());
         Label gameScoreLabel = new Label();
         Label levelLabel = new Label("Level : ");
+        VBox objective = new VBox();
         StackPane health = new StackPane();
 
         gameScoreLabel.textProperty()
-                .bind(getGameScore().asString().concat(" Points"));
-        gameScoreLabel.setFont(
-                new Font(Application.STYLESHEET_CASPIAN, 35));
-        gameScoreLabel.setTextFill(Color.WHITE);
+                .bind(gameScore.asString().concat(" Points"));
+        fontLabel(gameScoreLabel);
 
-        levelLabel.setFont(
-                Font.font("Montserrat", FontWeight.BOLD, 35));
-        levelLabel.setTextFill(Color.WHITE);
+        Label currentProgress = new Label();
+        currentProgress.textProperty().bind(gameProgress.asString().concat(" invaders eliminated"));
+        Label objectiveLabel = new Label(this.numberOfInvaders + " invaders to kill");
+
+        fontLabel(currentProgress);
+
+        fontLabel(objectiveLabel);
+
+        objective.getChildren().addAll(currentProgress, objectiveLabel);
+        fontLabel(levelLabel);
 
         levelLabel.setText(levelLabel.getText() + level);
 
@@ -200,7 +209,7 @@ public class GameWorld extends GameEngine {
         HUD.setPrefHeight(50);
         HUD.setAlignment(Pos.CENTER);
         HUD.getChildren()
-                .addAll(gameScoreLabel, levelLabel, health);
+                .addAll(gameScoreLabel, objective, levelLabel, health);
         HUD.setSpacing(
                 30);
         HUD.layoutXProperty()
@@ -215,6 +224,13 @@ public class GameWorld extends GameEngine {
 
         HUD.prefWidthProperty().bind(primaryStage.widthProperty());
         levelLabel.setRotate(0.000000001);
+    }
+
+    private void fontLabel(Label label) {
+        label.setFont(
+                Font.font("Montserrat", FontWeight.BOLD, 15));
+
+        label.setTextFill(Color.WHITE);
     }
 
     /**
@@ -254,20 +270,23 @@ public class GameWorld extends GameEngine {
 
                 if (!world.isFinished()) {
                     if (spaceShip.isCanFire()) {
-                        Missile missile = spaceShip.fire();
-                        getSpriteManager().addSprites(missile);
-                        getSceneNodes().getChildren().add(missile.getNode());
-                        missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
-                        missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
 
-                        spaceShip.setCanFire(false);
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                spaceShip.setCanFire(true);
-                            }
+                        for (int i = 0; i < level; i++) {
+                            Missile missile = spaceShip.fire(i + 1, level);
+                            getSpriteManager().addSprites(missile);
+                            getSceneNodes().getChildren().add(missile.getNode());
+                            missile.getNode().setLayoutX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
+                            missile.getNode().setLayoutY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
 
-                        }, (long) spaceShip.getFireSpeed());
+                            spaceShip.setCanFire(false);
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    spaceShip.setCanFire(true);
+                                }
+
+                            }, (long) (500 / spaceShip.getFireSpeed()));
+                        }
 
                     }
                     spaceShip.getNode().toFront();
@@ -280,8 +299,20 @@ public class GameWorld extends GameEngine {
 
             if (!world.isFinished()) {
                 if (e.getCode() == KeyCode.SPACE) {
-                    spaceShip.shieldToggle();
-                    return;
+                    if (spaceShip.isShieldAvailable()) {
+
+                        spaceShip.shieldToggle();
+                        spaceShip.setShieldAvailable(false);
+
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                spaceShip.setShieldAvailable(true);
+                            }
+                        }, (long) (spaceShip.getShieldCoolDown()));
+                        return;
+
+                    }
                 }
 
                 if (e.getCode() == KeyCode.DIGIT1) {
@@ -332,59 +363,56 @@ public class GameWorld extends GameEngine {
 
     }
 
-    private void generateInvaders() {
+    public void spawnInvaders() {
 
-        for (int i = 0; i < numberOfInvaders; i++) {
+        Invader invader;
 
-            Invader invader;
-            double percentage = Math.random();
+        if (level == 4) {
+            invader = new Invader(spaceShip, ResourcesManager.BOSS, level);
+            invader.setPoint(500);
+            invader.setHealth(2000);
 
-            if (level == 4) {
-                invader = new Invader(spaceShip, ResourcesManager.BOSS, level);
-                invader.setPoint(500);
-                invader.setHealth(2000);
+        } else if (level == 3) {
+            invader = new Invader(spaceShip, ResourcesManager.ENEMY3, level);
+            invader.setPoint(100);
+            invader.setHealth(1000);
 
-            } else if (level == 3) {
-                invader = new Invader(spaceShip, ResourcesManager.ENEMY3, level);
-                invader.setPoint(100);
-                invader.setHealth(1000);
+        } else if (level == 2) {
+            invader = new Invader(spaceShip, ResourcesManager.ENEMY2, level);
+            invader.setPoint(50);
+            invader.setHealth(500);
 
-            } else if (level == 2) {
-                invader = new Invader(spaceShip, ResourcesManager.ENEMY2, level);
-                invader.setPoint(50);
-                invader.setHealth(500);
-
-            } else {
-                invader = new Invader(spaceShip, ResourcesManager.ENEMY1, level);
-                invader.setPoint(20);
-                invader.setHealth(200);
-
-            }
-
-            getSpriteManager().addInvader(invader);
-
-            int rangeOfSpawn = (Map.getMAP_RADIUS());
-
-            int randomXPos;
-            int randomYPos;
-            double distanceX;
-            double distanceY;
-            do {
-                randomXPos = randomizer.nextInt(-rangeOfSpawn, rangeOfSpawn);
-                randomYPos = randomizer.nextInt(-rangeOfSpawn, rangeOfSpawn);
-
-                distanceX = randomXPos - spaceShip.getCenterX();
-                distanceY = randomYPos - spaceShip.getCenterY();
-
-            } while (randomXPos * randomXPos + randomYPos * randomYPos > Map.getMAP_RADIUS() * Map.getMAP_RADIUS()
-                    || distanceX * distanceX + distanceY * distanceY < SAFETY_REGION_RADIUS * SAFETY_REGION_RADIUS);
-
-            invader.getNode().setLayoutX(randomXPos);
-            invader.getNode().setLayoutY(randomYPos);
-            getSceneNodes().getChildren().add(invader.getNode());
-            getSpriteManager().addSprites(invader);
+        } else {
+            invader = new Invader(spaceShip, ResourcesManager.ENEMY1, level);
+            invader.setPoint(20);
+            invader.setHealth(200);
 
         }
+
+        invader.setSpeed(5+level);
+
+        getSpriteManager().addInvader(invader);
+
+        int rangeOfSpawn = (Map.getMAP_RADIUS());
+
+        int randomXPos;
+        int randomYPos;
+        double distanceX;
+        double distanceY;
+        do {
+            randomXPos = randomizer.nextInt(-rangeOfSpawn, rangeOfSpawn);
+            randomYPos = randomizer.nextInt(-rangeOfSpawn, rangeOfSpawn);
+
+            distanceX = randomXPos - spaceShip.getCenterX();
+            distanceY = randomYPos - spaceShip.getCenterY();
+
+        } while (randomXPos * randomXPos + randomYPos * randomYPos > Map.getMAP_RADIUS() * Map.getMAP_RADIUS()
+                || distanceX * distanceX + distanceY * distanceY < SAFETY_REGION_RADIUS * SAFETY_REGION_RADIUS);
+
+        invader.getNode().setLayoutX(randomXPos);
+        invader.getNode().setLayoutY(randomYPos);
+        getSceneNodes().getChildren().add(invader.getNode());
+        getSpriteManager().addSprites(invader);
 
     }
 

@@ -17,21 +17,21 @@ public class SpriteManager {
     /**
      * All the sprite objects currently in play
      */
-    private final static List<Sprite> sprites = new ArrayList<>();
+    private final  List<Sprite> sprites = new ArrayList<>();
 
     /**
      * A global single threaded list used to check collision against other
      * sprite objects.
      */
-    private final static List<Sprite> collisionList = new ArrayList<>();
+    private final  List<Sprite> collisionList = new ArrayList<>();
 
     /**
      * A global single threaded set used to cleanup or remove sprite objects in
      * play.
      */
-    private final static Set<Sprite> spritesToBeRemoved = new HashSet<>();
+    private final  Set<Sprite> spritesToBeRemoved = new HashSet<>();
 
-    private final static List<Invader> invaders = new ArrayList<>();
+    private final  List<Invader> invaders = new ArrayList<>();
 
     /**
      * Get the list of sprites.
@@ -125,7 +125,7 @@ public class SpriteManager {
         invaders.remove(a);
     }
 
-    public static List<Invader> getInvaders() {
+    public  List<Invader> getInvaders() {
         return invaders;
     }
 

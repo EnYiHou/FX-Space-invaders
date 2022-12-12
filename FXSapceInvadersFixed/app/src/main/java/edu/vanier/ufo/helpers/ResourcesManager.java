@@ -65,10 +65,15 @@ public class ResourcesManager {
     public static final String LASER = SOUNDS_FOLDER + "laser.wav";
     public static final String ROCKET = SOUNDS_FOLDER + "rocket.wav";
 
+    public static final String LEVEL1 = SOUNDS_FOLDER + "level1.mp3";
+    public static final String LEVEL2 = SOUNDS_FOLDER + "level2.mp3";
+    public static final String LEVEL3 = SOUNDS_FOLDER + "level3.mp3";
+    public static final String LEVEL4 = SOUNDS_FOLDER + "level4.mp3";
+
     // FXML files
     public static final String HOME_PAGE = FXML_FOLDER + "homgepage.fxml";
-    
 
     public static final String[] LEVELS_LIST = {ENTRY_LEVEL, BASIC_LEVEL, INTERMEDIATE_LEVEL, ADVANCED_LEVEL};
+    public static final String[] SOUND_LEVELS_LIST = {LEVEL1,LEVEL2,LEVEL3,LEVEL4};
 
 }

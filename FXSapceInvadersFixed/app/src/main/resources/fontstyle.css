@@ -1,0 +1,10 @@
+
+
+.label {
+    -fx-font-family: 'Fleftex';
+    -fx-font-size: 99;
+}
+
+.button .text {
+    -fx-font-family: 'Fleftex';
+}
