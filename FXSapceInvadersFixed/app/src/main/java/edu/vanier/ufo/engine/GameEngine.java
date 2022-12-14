@@ -1,10 +1,7 @@
 package edu.vanier.ufo.engine;
 
-import edu.vanier.ufo.game.Invader;
-import edu.vanier.ufo.game.Missile;
-import edu.vanier.ufo.game.Ship;
 import edu.vanier.ufo.helpers.HomePageController;
-import edu.vanier.ufo.ui.GameWorld;
+import edu.vanier.ufo.helpers.ResourcesManager;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,9 +11,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 /**
@@ -24,9 +21,9 @@ import javafx.stage.Stage;
  * which comprise of the fundamentals to a simple game loop in JavaFX:
  * <pre>
  *  <b>initialize()</b> - Initialize the game world.
- *  <b>beginGameLoop()</b> - Creates a JavaFX Timeline object containing the game life cycle.
- *  <b>updateSprites()</b> - Updates the sprite objects each period (per frame)
- *  <b>checkCollisions()</b> - Method will determine objects that collide with each other.
+ *  <b>beginGameLoop()</b> - Creates a JavaFX AnimationTimer object.
+ *  <b>updateSprites()</b> - Updates the sprite objects at each frame
+ *  <b>handleCollision()</b> - Method will determine objects that collide with each other.
  *  <b>cleanupSprites()</b> - Any sprite objects needing to be removed from play.
  * </pre>
  *
@@ -39,15 +36,13 @@ public abstract class GameEngine {
      */
     private Scene gameSurface;
 
-    /*
-    * The JavaFX Game Screen
-     */
     /**
-     * All nodes to be displayed in the game window.
+     * Root node of the gameSurface.
      */
     private Pane sceneNode;
+
     /**
-     * The game loop using JavaFX's <code>Timeline</code> API.
+     * The AnimationTimer used to create the gameLoop.
      */
     private static AnimationTimer gameLoop;
 
@@ -80,8 +75,7 @@ public abstract class GameEngine {
      * Number of invaders
      */
     protected int numberOfInvaders;
-    
-    
+
     protected MediaPlayer gameMusic;
 
     /**
@@ -114,13 +108,13 @@ public abstract class GameEngine {
             @Override
             public void handle(long now) {
 
-                if (now - lastUpdate >= 10_000_000) {
+                if (now - lastUpdate >= 1/(float)(framesPerSecond) * 1_000_000_000) {
                     lastUpdate = now;
                     if (!engine.isFinished()) {
                         // update actors
                         updateSprites();
                         // check for collision.
-                        checkCollisions();
+                        handleCollision();
                         // removed dead sprites.
                         cleanupSprites();
                     }
@@ -166,77 +160,85 @@ public abstract class GameEngine {
     protected void handleUpdate(Sprite sprite) {
     }
 
-    protected void checkCollisions() {
-        //FIXME: handle collision with the spaceship.
-        // check other sprite's collisions
-        spriteManager.resetCollisionsToCheck();
-        // check each sprite against other sprite objects.
-        for (Sprite spriteA : spriteManager.getCollisionsToCheck()) {
-            for (Sprite spriteB : spriteManager.getAllSprites()) {
-                if (handleCollision(spriteA, spriteB)) {
-
-                    Shape intersect = Shape.intersect(spriteA.getCollidingNode(), spriteB.getCollidingNode());
-                    if (spriteA instanceof Missile) {
-                        if ((spriteB instanceof Invader)) {
-
-                            Missile missile = ((Missile) spriteA);
-                            Invader invader = ((Invader) spriteB);
-                            missile.implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
-
-                            if (!invader.isIsDead()) {
-                                invader.setHealth(invader.getHealth().get() - missile.getDamage());
-
-                                if (invader.getHealth().get() < 0) {
-                                    getSpriteManager().removeInvader(invader);
-                                    invader.implode(this, invader.getCenterX(), invader.getCenterY());
-                                    getSpriteManager().addSpritesToBeRemoved(invader);
-                                    gameScore.set(gameScore.get() + invader.getPoint());
-                                    gameProgress.set(gameProgress.get() + 1);
-                                    invader.setIsDead(true);
-                                    if (spriteManager.getInvaders().isEmpty()) {
-                                        victory();
-                                    }
-
-                                }
-                            }
-                            getSpriteManager().addSpritesToBeRemoved(missile);
-                        }
-                    }
-
-                    if (spriteA instanceof Ship) {
-                        if ((spriteB instanceof Invader)) {
-                            Ship ship = ((Ship) spriteA);
-                            if (!ship.isShieldOn()) {
-                                ship.damaged();
-                            } else {
-                                ship.setShieldOn(false);
-                                ship.getShieldFade().jumpTo(ship.getShieldFade().getDuration());
-                                ship.collidingNode.setOpacity(0);
-
-                            }
-                            ((Invader) spriteB).implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
-                            getSpriteManager().addSpritesToBeRemoved(spriteB);
-                            getSpriteManager().removeInvader((Invader) spriteB);
-                            if (spriteManager.getInvaders().isEmpty()) {
-                                victory();
-                            }
-                            if (ship.getHealth().get() == 0) {
-                                ship.isDead = true;
-                                defeat();
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-        if (gameProgress.get() + spriteManager.getInvaders().size() < numberOfInvaders && (spriteManager.getInvaders().size() < 7)) {
-            ((GameWorld) this).spawnInvaders();
-            System.out.println("Spawned a new Invader");
-
-        }
+    protected void handleCollision() {
+      
     }
 
+    
+     /**
+     * Handle victory.
+     */
+    public void victory() {
+
+        {
+            finished = true;
+            SoundManager.playSound("win");
+            finished(true);
+        }
+
+    }
+
+    /**
+     * Handle defeat.
+     */
+    public void defeat() {
+
+        finished = true;
+        finished(false);
+
+    }
+
+    /**
+     * Handle the end of the game based on the result of the game.
+     *
+     * @param isVictory the result of the game. True if victory and false if
+     * defeat.
+     */
+    private void finished(boolean isVictory) {
+
+        this.gameMusic.stop();
+        // The alert in which it will tell the user if he lost or he won.
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        // If the user won
+        if (isVictory) {
+            ImageView victoryImageView = new ImageView(ResourcesManager.VICTORY);
+            victoryImageView.setFitWidth(100);
+            victoryImageView.setPreserveRatio(true);
+            alert.setGraphic(victoryImageView);
+            alert.setHeaderText("Congratulation!");
+            alert.setTitle("Victory!");
+            alert.setContentText("You won the game, try another level!");
+
+        // If the user lost
+        } else {
+            ImageView defeatImageView = new ImageView(ResourcesManager.GAME_OVER);
+            defeatImageView.setFitWidth(100);
+            defeatImageView.setPreserveRatio(true);
+            alert.setGraphic(defeatImageView);
+            alert.setHeaderText("Unfortunately You Lost.");
+            alert.setTitle("Defeat...");
+            alert.setContentText("Try again with another level!");
+        }
+        Stage primaryStage = (Stage) gameSurface.getWindow();
+        primaryStage.setFullScreen(false);
+        
+        //Handle if the user closes the alert. Go back to home page to let the user
+        //choose another level
+        alert.setOnCloseRequest((e) -> {
+            try {
+                this.shutdown();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
+                loader.setController(new HomePageController());
+                Pane pane = loader.load();
+
+                primaryStage.setScene(new Scene(pane));
+            } catch (IOException ex) {
+            }
+        });
+        alert.show();
+
+    }
     /**
      * When two objects collide this method can handle the passed in sprite
      * objects. By default it returns false, meaning the objects do not collide.
@@ -245,9 +247,8 @@ public abstract class GameEngine {
      * @param spriteB - called from checkCollision() method to be compared.
      * @return boolean True if the objects collided, otherwise false.
      */
-    protected boolean handleCollision(Sprite spriteA, Sprite spriteB) {
-        Shape shape = Shape.intersect(spriteA.collidingNode, spriteB.collidingNode);
-        return shape.getBoundsInLocal().getWidth() > -1;
+    protected boolean checkCollision(Sprite spriteA, Sprite spriteB) {
+        return true;
     }
 
     /**
@@ -275,20 +276,28 @@ public abstract class GameEngine {
         return windowTitle;
     }
 
+    /**
+     * 
+     * @return the scene nodes of this game engine containing all the added nodes.
+     */
     public Pane getSceneNodes() {
         return this.sceneNode;
     }
 
-    public void setSceneNodes(Pane centerPane) {
-        this.sceneNode = centerPane;
+    /**
+     * set the scene node.
+     * @param sceneNode the scene node to set
+     */
+    public void setSceneNodes(Pane sceneNode) {
+        this.sceneNode = sceneNode;
     }
 
     /**
-     * The game loop (Timeline) which is used to update, check collisions, and
-     * cleanup sprite objects at every interval (fps).
+     * The game loop (AnimationTimer) which is used to update, check collisions,
+     * and cleanup sprite objects at every interval (fps).
      *
-     * @return Timeline An animation running indefinitely representing the game
-     * loop.
+     * @return AnimationTimer, an animation running indefinitely representing
+     * the game loop.
      */
     protected static AnimationTimer getGameLoop() {
         return gameLoop;
@@ -297,8 +306,8 @@ public abstract class GameEngine {
     /**
      * The sets the current game loop for this game world.
      *
-     * @param gameLoop Timeline object of an animation running indefinitely
-     * representing the game loop.
+     * @param gameLoop AnimationTimer object of an animation running
+     * indefinitely representing the game loop.
      */
     protected static void setGameLoop(AnimationTimer gameLoop) {
         GameEngine.gameLoop = gameLoop;
@@ -314,10 +323,20 @@ public abstract class GameEngine {
         return spriteManager;
     }
 
+    /**
+     * Get if the game ended
+     *
+     * @return if the game ended
+     */
     public boolean isFinished() {
         return finished;
     }
 
+    /**
+     * Set the game ended.
+     *
+     * @param finished if the game ended
+     */
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
@@ -343,78 +362,32 @@ public abstract class GameEngine {
     }
 
     /**
-     * All JavaFX nodes which are rendered onto the game surface(Scene) is a
-     * JavaFX Group object.
+     * Returns an integer property of the game score. The score value is stored
+     * inside the property.
      *
-     * @return Group The root containing many child nodes to be displayed into
-     * the Scene area.
-     */
-    /**
-     * Sets the JavaFX Group that will hold all JavaFX nodes which are rendered
-     * onto the game surface(Scene) is a JavaFX Group object.
-     *
-     * @param sceneNodes The root container having many children nodes to be
-     * displayed into the Scene area.
+     * @return the integer property of the game score.
      */
     public IntegerProperty getGameScore() {
         return gameScore;
     }
 
+    /**
+     * Set the value of the integer property game score
+     * @param gameScore the desired value for game score.
+     */
     public void setGameScore(int gameScore) {
         this.gameScore.set(gameScore);
     }
 
-    private void victory() {
-
-        {
-            finished = true;
-            SoundManager.playSound("win");
-            finished(true);
-        }
-
-    }
-
-    private void defeat() {
-
-        finished = true;
-        finished(false);
-
-    }
-
-    private void finished(boolean victory) {
-
-        this.gameMusic.stop();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        if (victory) {
-            alert.setContentText("Victory!");
-
-        } else {
-            alert.setContentText("Defeat...");
-        }
-        Stage primaryStage = (Stage) gameSurface.getWindow();
-        primaryStage.setFullScreen(false);
-        alert.setOnCloseRequest((e) -> {
-            try {
-                this.shutdown();
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
-                loader.setController(new HomePageController());
-                Pane pane = loader.load();
-
-                primaryStage.setScene(new Scene(pane));
-            } catch (IOException ex) {
-                Logger.getLogger(GameEngine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        alert.show();
-
-    }
+   
 
     /**
-     * Stop threads and stop media from playing.
+     * Stop threads and stop media from playing. Clear all sprites to allow the
+     * user play a new level with new sprites
      */
     public void shutdown() {
-        // Stop the game's animation.
         finished = true;
+        // Stop the game's animation
         getSpriteManager().clear();
         getGameLoop().stop();
         SoundManager.shutdown();

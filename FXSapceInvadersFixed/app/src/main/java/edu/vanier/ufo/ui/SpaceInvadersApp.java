@@ -12,40 +12,37 @@ import javafx.stage.Stage;
 
 /**
  * The main driver of the game.
- *
- * @author cdea
+ * @author EnYi
  */
 public class SpaceInvadersApp extends Application {
 
+    /**
+     * The game engine
+     */
     GameEngine gameWorld;
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        // Load the homepage fxml file into the scene
         FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
         loader.setController(new HomePageController());
         Pane pane = loader.load();
-
+        
         primaryStage.setOnCloseRequest((e) -> {
             Platform.exit();
             System.exit(0);
         });
 
         primaryStage.setScene(new Scene(pane));
-        setStage(primaryStage);
+        
         primaryStage.show();
     }
 
-    private void setStage(Stage stage) {
-        stage.setMinHeight(500);
-        stage.setMinWidth(650);
-    }
+   
 
     @Override
     public void stop() throws Exception {

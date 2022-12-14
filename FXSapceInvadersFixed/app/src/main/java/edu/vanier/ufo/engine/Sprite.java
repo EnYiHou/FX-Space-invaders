@@ -19,38 +19,64 @@ public abstract class Sprite {
     private double height;
     public boolean isDead = false;
 
+    // The JavaFX Shape Circle that corresponds to the collision node of the sprite
     protected Circle collidingNode;
-    protected Circle originalCollidingNode;
+    
 
+    
     public Sprite() {
         vX = 0;
         vY = 0;
     }
 
+    
+    /**
+     * set the sprite image
+     * @param inImage the image to set
+     */
     public void setImage(Image inImage) {
         image = inImage;
         width = inImage.getWidth();
         height = inImage.getHeight();
     }
 
+    /**
+     * set the sprite image
+     * @param filename the file path of the image to set
+     */
     public void setImage(String filename) {
         Image image = new Image(filename);
         setImage(image);
     }
 
+    /**
+     * Set the velocity of the sprite
+     * @param x the x-axis velocity
+     * @param y  the y-axis velocity
+     */
     public void setVelocity(double x, double y) {
         vX = x;
         vY = y;
     }
 
+    /**
+     * Add the velocity to the velocity of the sprite
+     * @param x the x-axis velocity
+     * @param y  the y-axis velocity
+     */
     public void addVelocity(double x, double y) {
         vX += x;
         vY += y;
     }
 
-    
+     /**
+     * The center X coordinate of the current visible image. See
+     * <code>getCurrentShipImage()</code> method.
+     *
+     * @return The scene or screen X coordinate.
+     */
       public double getCenterX() {
-        return getNode().getLayoutX() + ( getNode().getBoundsInLocal().getWidth() / 2);
+        return getNode().getTranslateX() + ( getNode().getBoundsInLocal().getWidth() / 2);
     }
 
     /**
@@ -60,22 +86,26 @@ public abstract class Sprite {
      * @return The scene or screen Y coordinate.
      */
     public double getCenterY() {
-        return getNode().getLayoutY() + ( getNode().getBoundsInLocal().getHeight() / 2);
+        return getNode().getTranslateY() + ( getNode().getBoundsInLocal().getHeight() / 2);
     }
+  
     /**
-     * Did this sprite collide into the other sprite?
-     *
-     * @param other - The other sprite.
-     * @return boolean - Whether this or the other sprite collided, otherwise
-     * false.
+     * detect whether this sprite collide with another sprite
+     * 
+     * @param other another sprite to check collision with
+     * @return a boolean of whether this sprite collide with the other sprite
      */
     public boolean collide(Sprite other) {
         return collidingNode.getBoundsInParent().intersects(other.node.getBoundsInParent());
 
     }
 
+    /**
+     * This method determines how this sprit update at each frame
+     */
     public abstract void update();
 
+    
     public boolean intersects(Sprite s) {
         //return s.getBoundary().intersects(this.getBoundary());        
         Bounds sBounds = s.getNode().localToScene(s.getNode().getBoundsInLocal());
@@ -132,13 +162,7 @@ public abstract class Sprite {
         gameWorld.getSpriteManager().addSpritesToBeRemoved(this);
     }
 
-    public Circle getOriginalCollidingNode() {
-        return originalCollidingNode;
-    }
-
-    public void setOriginalCollidingNode(Circle originalCollidingNode) {
-        this.originalCollidingNode = originalCollidingNode;
-    }
+    
 
     public Circle getCollidingNode() {
         return collidingNode;

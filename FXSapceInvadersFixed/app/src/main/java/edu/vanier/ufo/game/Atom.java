@@ -38,7 +38,7 @@ public class Atom extends Sprite {
         Image shipImage = new Image(imagePath);
         newAtom.setImage(shipImage);
         newAtom.setCache(true);
-        newAtom.setCacheHint(CacheHint.SCALE_AND_ROTATE);
+        newAtom.setCacheHint(CacheHint.ROTATE);
         this.view = newAtom;
 
         flipBook.getChildren().add(newAtom);
@@ -53,7 +53,6 @@ public class Atom extends Sprite {
         hitBounds.setOpacity(0);
         flipBook.getChildren().add(hitBounds);
         setCollidingNode(hitBounds);
-        setOriginalCollidingNode(hitBounds);
     }
 
     /**
@@ -62,8 +61,8 @@ public class Atom extends Sprite {
     @Override
     public void update() {
         durationCounter++;
-        getNode().setLayoutX(getNode().getLayoutX() + vX);
-        getNode().setLayoutY(getNode().getLayoutY() + vY);
+        getNode().setTranslateX(getNode().getTranslateX() + vX);
+        getNode().setTranslateY(getNode().getTranslateY() + vY);
     }
 
     /**
@@ -92,8 +91,8 @@ public class Atom extends Sprite {
         
         gameWorld.getSceneNodes().getChildren().remove(currentNode);
         gameWorld.getSceneNodes().getChildren().add(group);
-        group.setLayoutX(xCoord- explosionImage.getWidth() / 2);
-        group.setLayoutY(yCoord - explosionImage.getHeight() / 2);
+        group.setTranslateX(xCoord- explosionImage.getWidth() / 2);
+        group.setTranslateY(yCoord - explosionImage.getHeight() / 2);
        
         SoundManager.playSound("explosion");
 
@@ -127,9 +126,6 @@ public class Atom extends Sprite {
     public void setHitBounds(Circle hitBounds) {
         this.hitBounds = hitBounds;
     }
-
-    
-    
     public void setDurationCounter(int durationCounter) {
         this.durationCounter = durationCounter;
     }

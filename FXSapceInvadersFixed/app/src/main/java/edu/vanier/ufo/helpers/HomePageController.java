@@ -1,14 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package edu.vanier.ufo.helpers;
 
 import edu.vanier.ufo.ui.GameWorld;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -18,12 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 /**
@@ -32,7 +20,7 @@ import javafx.stage.Stage;
  */
 public class HomePageController {
 
-    private IntegerProperty currentChosenLevel = new SimpleIntegerProperty(1);
+    private final IntegerProperty currentChosenLevel = new SimpleIntegerProperty(1);
 
     @FXML
     Button leftBtn;
@@ -49,14 +37,7 @@ public class HomePageController {
     @FXML
     ImageView imageview;
 
-    @FXML
-    ImageView background;
-
-    @FXML
-    HBox hbox;
-
-    @FXML
-    StackPane stackpane;
+   
 
     @FXML
     void initialize() {
@@ -69,6 +50,9 @@ public class HomePageController {
 
     }
 
+    /**
+     * Set the image view according to the level
+     */
     private void setImageView() {
 
         Image image = new Image(ResourcesManager.LEVELS_LIST[currentChosenLevel.get() - 1]);
@@ -76,6 +60,10 @@ public class HomePageController {
 
     }
 
+    /**
+     * Handle the button.
+     * The button starts the game with the selected level
+     */
     private void setPlayBtn() {
 
         playBtn.setOnAction((e) -> {
@@ -89,12 +77,18 @@ public class HomePageController {
         });
     }
 
+    /**
+     * Binds the textPropert of the title label to the current chosen level
+     */
     private void setLevelLabel() {
         level.textProperty().bind(Bindings.createStringBinding(() -> {
             return "Level : ".concat(currentChosenLevel.getValue().toString());
         }, currentChosenLevel));
     }
 
+    /**
+     * Set arrows button to allow the user switch between levels.
+     */
     private void setLeftBtn() {
 
         leftBtn.setOnMouseEntered((e) -> {
@@ -137,6 +131,10 @@ public class HomePageController {
         });
     }
 
+    /**
+     * verify if the buttons can be clicked. The user cannot choose a level less 
+     * than 1 or more than 4
+     */
     private void checkButtons() {
 
         int i = currentChosenLevel.get();

@@ -12,15 +12,15 @@ public class ResourcesManager {
     /**
      * Used to control the speed of the game.
      */
-    public static final int FRAMES_PER_SECOND = 85;
+    public static final int FRAMES_PER_SECOND = 65;
     private static final String RESOURCES_FOLDER = "";
     private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "images/";
     private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "sounds/";
-    private static final String VIDEOS_FOLDER = RESOURCES_FOLDER + "videos/";
     private static final String FXML_FOLDER = RESOURCES_FOLDER + "fxml/";
 
     private static final String LEVEL_IMAGES = IMAGES_FOLDER + "levels/";
-    private static final String STYLESHEET_FOLDER = RESOURCES_FOLDER + "stylesheet/";
+    private static final String ENDSCREEN_IMAGES = IMAGES_FOLDER + "endscreen/";
+
     private static final String ALLY_IMAGES = IMAGES_FOLDER + "ally/";
     private static final String ALLY_SHIP_IMAGES = ALLY_IMAGES + "ship/";
     private static final String ALLY_MISSILE_IMAGES = ALLY_IMAGES + "missile/";
@@ -53,9 +53,13 @@ public class ResourcesManager {
     public static final String ROCKET_NORMAL = ALLY_MISSILE_IMAGES + "normal.png";
     public static final String ROCKET_ULTIMATE = ALLY_MISSILE_IMAGES + "ultimate.png";
 
+    // End screen images
+    public static final String VICTORY = ENDSCREEN_IMAGES + "victory.png";
+    public static final String GAME_OVER = ENDSCREEN_IMAGES + "gameover.png";
+
     // Collision gif
     public static final String ROCKET_EXPLOSION = IMAGES_FOLDER + "explosion.gif";
-    // Home Page Contents
+
     //public static final String TRAILER_VIDEO = VIDEOS_FOLDER + "Trailer.mp4";
     public static final String BACKGROUND = IMAGES_FOLDER + "background.jpeg";
 
@@ -65,6 +69,7 @@ public class ResourcesManager {
     public static final String LASER = SOUNDS_FOLDER + "laser.wav";
     public static final String ROCKET = SOUNDS_FOLDER + "rocket.wav";
 
+    // Game level music
     public static final String LEVEL1 = SOUNDS_FOLDER + "level1.mp3";
     public static final String LEVEL2 = SOUNDS_FOLDER + "level2.mp3";
     public static final String LEVEL3 = SOUNDS_FOLDER + "level3.mp3";
@@ -74,6 +79,6 @@ public class ResourcesManager {
     public static final String HOME_PAGE = FXML_FOLDER + "homgepage.fxml";
 
     public static final String[] LEVELS_LIST = {ENTRY_LEVEL, BASIC_LEVEL, INTERMEDIATE_LEVEL, ADVANCED_LEVEL};
-    public static final String[] SOUND_LEVELS_LIST = {LEVEL1,LEVEL2,LEVEL3,LEVEL4};
+    public static final String[] SOUND_LEVELS_LIST = {LEVEL1, LEVEL2, LEVEL3, LEVEL4};
 
 }

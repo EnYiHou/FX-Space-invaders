@@ -18,7 +18,12 @@ public class SpriteManager {
      * All the sprite objects currently in play
      */
     private final  List<Sprite> sprites = new ArrayList<>();
+      
+    /**
+     * All the invaders objects currently in play
+     */
 
+    private final  List<Invader> invaders = new ArrayList<>();
     /**
      * A global single threaded list used to check collision against other
      * sprite objects.
@@ -30,8 +35,7 @@ public class SpriteManager {
      * play.
      */
     private final  Set<Sprite> spritesToBeRemoved = new HashSet<>();
-
-    private final  List<Invader> invaders = new ArrayList<>();
+  
 
     /**
      * Get the list of sprites.
