@@ -1,2 +1,2 @@
 # FX-Space-invaders
-Game-development with Java Fx
+Game-development with Java FX
