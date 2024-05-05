@@ -2,7 +2,9 @@
 
 Welcome to the Space Invaders JavaFX Game! This is an exciting and action-packed game where you take control of a battle ship and face off against enemy ships in a thrilling space combat. Your objective is to destroy all the enemy ships across four challenging levels, each increasing in difficulty as you progress.
 
-
+<p align="center">
+  <img src="https://github.com/EnYiHou/FX-Space-invaders/blob/main/images/gameplay.png?raw=true" alt="Game Screenshot" width="600">
+</p>
 
 ## Table of Contents
 - [Installation](#installation)
@@ -38,6 +40,14 @@ The game window will open, and you can start playing!
 - Be cautious! The enemy ships will chase you and attempt to destroy your battle ship.
 - Each level increases in difficulty, so be prepared for a greater challenge as you progress.
 
+<p align="center">
+  <img src="https://github.com/EnYiHou/FX-Space-invaders/blob/main/images/Level1.png?raw=true" alt="Game Screenshot 1" width="300">
+  <img src="https://github.com/EnYiHou/FX-Space-invaders/blob/main/images/Level2.png?raw=true" alt="Game Screenshot 2" width="300">
+</p>
+<p align="center">
+  <img src="https://github.com/EnYiHou/FX-Space-invaders/blob/main/images/Level3.png?raw=true" alt="Game Screenshot 3" width="300">
+  <img src="https://github.com/EnYiHou/FX-Space-invaders/blob/main/images/Level4.png?raw=true" alt="Game Screenshot 4" width="300">
+</p>
 
 ## Technologies Used
 
