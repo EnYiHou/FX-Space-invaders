@@ -10,6 +10,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,18 +48,17 @@ public class GameWorld extends GameEngine {
     private static final Timer timer = new Timer();
 
     /*
-    Number of generated Invaders
-    Minimum spawn distance from the spaceShip
+     * Number of generated Invaders
+     * Minimum spawn distance from the spaceShip
      */
     private static final int SAFETY_REGION_RADIUS = 2000;
     private final int level;
 
     private Stage primaryStage;
 
-
-    /* 
-    Returns the boolean of approximative equal. 
-    The interval of accepted error is TOLERANCE.
+    /*
+     * Returns the boolean of approximative equal.
+     * The interval of accepted error is TOLERANCE.
      */
     private static final double TOLERANCE = 0.1;
 
@@ -64,9 +66,9 @@ public class GameWorld extends GameEngine {
         return Math.abs(d1 - d2) < TOLERANCE;
     }
 
-    /* 
-    Stores the relative value of mouseX and mouseY to the current Screen. 
-    It is updated at each SpaceShip Movement and Mouse Movement.
+    /*
+     * Stores the relative value of mouseX and mouseY to the current Screen.
+     * It is updated at each SpaceShip Movement and Mouse Movement.
      */
     private final DoubleProperty mouseX = new SimpleDoubleProperty();
     private final DoubleProperty mouseY = new SimpleDoubleProperty();
@@ -81,7 +83,7 @@ public class GameWorld extends GameEngine {
 
     /**
      *
-     * @param fps the fps at which the game refreshes
+     * @param fps   the fps at which the game refreshes
      * @param title
      * @param level
      */
@@ -107,20 +109,20 @@ public class GameWorld extends GameEngine {
         // Sets the window title
         primaryStage.setTitle(getWindowTitle());
 
-        //primary stage limit size
+        // primary stage limit size
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(500);
 
         // Create the scene
         setSceneNodes(new Pane());
         setGameSurface(new Scene(getSceneNodes(), 1800, 1800));
-//        getSceneNodes().setCache(true);
-//        getSceneNodes().setPrefWidth(2000);
-//        getSceneNodes().setCacheHint(CacheHint.SPEED);
-//       
+        // getSceneNodes().setCache(true);
+        // getSceneNodes().setPrefWidth(2000);
+        // getSceneNodes().setCacheHint(CacheHint.SPEED);
+        //
 
         // Load css stylesheet
-        // Generate invaders of 
+        // Generate invaders of
         // Generate Camera
         Camera cam = createCamera();
         getGameSurface().setCamera(cam);
@@ -145,7 +147,7 @@ public class GameWorld extends GameEngine {
 
         loadSoundSource();
 
-        //set Full screen
+        // set Full screen
         primaryStage.setFullScreen(true);
 
         this.gameMusic = SoundManager.playGameMusic("level" + String.valueOf(this.level));
@@ -153,15 +155,26 @@ public class GameWorld extends GameEngine {
     }
 
     private void loadSoundSource() {
-        SoundManager.loadSoundEffects("explosion", getClass().getClassLoader().getResource(ResourcesManager.EXPLOSION));
-        SoundManager.loadSoundEffects("laser", getClass().getClassLoader().getResource(ResourcesManager.LASER));
-        SoundManager.loadSoundEffects("win", getClass().getClassLoader().getResource(ResourcesManager.WIN));
-        SoundManager.loadSoundEffects("rocket", getClass().getClassLoader().getResource(ResourcesManager.ROCKET));
-
-        SoundManager.loadGameMusic("level1", getClass().getClassLoader().getResource(ResourcesManager.LEVEL1));
-        SoundManager.loadGameMusic("level2", getClass().getClassLoader().getResource(ResourcesManager.LEVEL2));
-        SoundManager.loadGameMusic("level3", getClass().getClassLoader().getResource(ResourcesManager.LEVEL3));
-        SoundManager.loadGameMusic("level4", getClass().getClassLoader().getResource(ResourcesManager.LEVEL4));
+        try {
+            SoundManager.loadSoundEffects("explosion",
+                    getClass().getResource(ResourcesManager.EXPLOSION).toURI().toURL());
+            SoundManager.loadSoundEffects("laser",
+                    getClass().getResource(ResourcesManager.LASER).toURI().toURL());
+            SoundManager.loadSoundEffects("win",
+                    getClass().getResource(ResourcesManager.WIN).toURI().toURL());
+            SoundManager.loadSoundEffects("rocket",
+                    getClass().getResource(ResourcesManager.ROCKET).toURI().toURL());
+            SoundManager.loadGameMusic("level1",
+                    getClass().getResource(ResourcesManager.LEVEL1).toURI().toURL());
+            SoundManager.loadGameMusic("level2",
+                    getClass().getResource(ResourcesManager.LEVEL2).toURI().toURL());
+            SoundManager.loadGameMusic("level3",
+                    getClass().getResource(ResourcesManager.LEVEL3).toURI().toURL());
+            SoundManager.loadGameMusic("level4",
+                    getClass().getResource(ResourcesManager.LEVEL4).toURI().toURL());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -238,7 +251,7 @@ public class GameWorld extends GameEngine {
 
         ImageView heartView = new ImageView();
         heartView.setOpacity(0.6);
-        Image heartImage = new Image(ResourcesManager.HEART);
+        Image heartImage = new Image(getClass().getResource(ResourcesManager.HEART).toExternalForm());
         heartView.setImage(heartImage);
         heartView.setFitHeight(50);
         heartView.setPreserveRatio(true);
@@ -292,12 +305,14 @@ public class GameWorld extends GameEngine {
     private void setupInput(Stage primaryStage) {
         GameWorld world = this;
 
-        //Set the rotation of the ship to follow the mouse
+        // Set the rotation of the ship to follow the mouse
         spaceShip.getNode().rotateProperty().bind(Bindings.createDoubleBinding(() -> {
 
             return Math.atan2(
-                    mouseY.getValue() - (spaceShip.getNode().getTranslateY() + spaceShip.getNode().getBoundsInLocal().getHeight() / 2),
-                    mouseX.getValue() - spaceShip.getNode().getTranslateX() - spaceShip.getNode().getBoundsInLocal().getWidth() / 2)
+                    mouseY.getValue() - (spaceShip.getNode().getTranslateY()
+                            + spaceShip.getNode().getBoundsInLocal().getHeight() / 2),
+                    mouseX.getValue() - spaceShip.getNode().getTranslateX()
+                            - spaceShip.getNode().getBoundsInLocal().getWidth() / 2)
                     * 180 / Math.PI;
         }, mouseX, mouseY, spaceShip.getNode().translateXProperty(), spaceShip.getNode().translateYProperty()));
 
@@ -317,7 +332,7 @@ public class GameWorld extends GameEngine {
             }
         });
 
-        //Set the mouse event to handle shooting
+        // Set the mouse event to handle shooting
         primaryStage.getScene().setOnMouseClicked((e) -> {
             if (e.getButton() == MouseButton.PRIMARY) {
 
@@ -328,8 +343,10 @@ public class GameWorld extends GameEngine {
                             Missile missile = spaceShip.fire(i + 1, level);
                             getSpriteManager().addSprites(missile);
                             getSceneNodes().getChildren().add(missile.getNode());
-                            missile.getNode().setTranslateX(spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
-                            missile.getNode().setTranslateY(spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
+                            missile.getNode().setTranslateX(
+                                    spaceShip.getCenterX() - missile.getNode().getBoundsInLocal().getWidth() / 2);
+                            missile.getNode().setTranslateY(
+                                    spaceShip.getCenterY() - missile.getNode().getBoundsInLocal().getHeight() / 2);
 
                             spaceShip.setCanFire(false);
                             timer.schedule(new TimerTask() {
@@ -350,7 +367,7 @@ public class GameWorld extends GameEngine {
 
         primaryStage.getScene().setOnKeyPressed((var e) -> {
 
-            //set the keyboard event to activate shield
+            // set the keyboard event to activate shield
             if (!world.isFinished()) {
                 if (e.getCode() == KeyCode.SPACE) {
                     if (spaceShip.isShieldAvailable()) {
@@ -369,7 +386,7 @@ public class GameWorld extends GameEngine {
                     }
                 }
 
-                //set the keyboard event to change weapons
+                // set the keyboard event to change weapons
                 if (e.getCode() == KeyCode.DIGIT1) {
                     spaceShip.changeWeapon(e.getCode());
                 }
@@ -486,9 +503,7 @@ public class GameWorld extends GameEngine {
     @Override
     protected void handleUpdate(Sprite sprite) {
 
-        
-            handleOutOfMap(sprite);
-        
+        handleOutOfMap(sprite);
 
         if (!this.isFinished()) {
             sprite.update();
@@ -506,7 +521,7 @@ public class GameWorld extends GameEngine {
      * Handle a specific sprite to prevent it from going out of the map
      * 
      * if the sprite is a missile or an invader, it implodes.
-     * if the sprite is the spaceship, it will set its velocity's direction 
+     * if the sprite is the spaceship, it will set its velocity's direction
      * toward the center of the map
      *
      * @param sprite the sprite that is getting handled
@@ -566,23 +581,22 @@ public class GameWorld extends GameEngine {
      */
     @Override
     protected boolean checkCollision(Sprite spriteA, Sprite spriteB) {
-        //TODO: implement collision detection here.
+        // TODO: implement collision detection here.
         Shape shape = Shape.intersect(spriteA.getCollidingNode(), spriteB.getCollidingNode());
         return shape.getBoundsInLocal().getWidth() > -1;
     }
 
-    
     /**
-     * Overridden method that handles the collision between two sprites. 
-     * If an invader collides with a missile, it loses health, and it implodes 
+     * Overridden method that handles the collision between two sprites.
+     * If an invader collides with a missile, it loses health, and it implodes
      * if its health is lower than 0.
      * 
      * If an invader collides with the spaceship, the spaceship loses 1 heart
      * and the invader implodes.
      * 
-     * If the number of invaders on the field added with the eliminated number 
+     * If the number of invaders on the field added with the eliminated number
      * of invaders is less than the total number of invaders of the level, spawn
-     * a new invader. 
+     * a new invader.
      */
     @Override
     protected void handleCollision() {
@@ -597,7 +611,8 @@ public class GameWorld extends GameEngine {
 
                         Missile missile = ((Missile) spriteA);
                         Invader invader = ((Invader) spriteB);
-                        missile.implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
+                        missile.implode(this, intersect.getBoundsInParent().getCenterX(),
+                                intersect.getBoundsInParent().getCenterY());
 
                         if (!invader.isIsDead()) {
                             invader.setHealth(invader.getHealth().get() - missile.getDamage());
@@ -616,7 +631,7 @@ public class GameWorld extends GameEngine {
 
                     } else if (spriteA instanceof Ship ship) {
                         if ((spriteB instanceof Invader invader)) {
-                             
+
                             if (!ship.isShieldOn()) {
                                 ship.damaged();
                             } else {
@@ -625,7 +640,8 @@ public class GameWorld extends GameEngine {
                                 ship.getCollidingNode().setOpacity(0);
 
                             }
-                            invader.implode(this, intersect.getBoundsInParent().getCenterX(), intersect.getBoundsInParent().getCenterY());
+                            invader.implode(this, intersect.getBoundsInParent().getCenterX(),
+                                    intersect.getBoundsInParent().getCenterY());
                             getSpriteManager().addSpritesToBeRemoved(spriteB);
                             getSpriteManager().removeInvader((Invader) spriteB);
 
@@ -640,7 +656,8 @@ public class GameWorld extends GameEngine {
                 }
             }
         }
-        if (gameProgress.get() + getSpriteManager().getInvaders().size() < numberOfInvaders && (getSpriteManager().getInvaders().size() < 9)) {
+        if (gameProgress.get() + getSpriteManager().getInvaders().size() < numberOfInvaders
+                && (getSpriteManager().getInvaders().size() < 9)) {
             this.spawnInvaders();
 
         }

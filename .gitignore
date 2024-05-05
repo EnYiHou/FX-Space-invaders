@@ -1,4 +1,4 @@
-# MacOS 
+# MacOS
 .DS_Store
 
 # Vscode
@@ -7,18 +7,18 @@
 
 # IntelliJ
 */.idea/*
-
+*.iml
 
 # Gradle
 */.gradle/*
-
+*/build/*
 
 # Java
 *.class
 *.jar
-*.war
-*.ear
-*.log
 
 # Maven
 *.bin
+
+# Additional
+*.lock

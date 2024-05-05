@@ -17,6 +17,9 @@ import javafx.util.Duration;
 
 import javafx.scene.image.ImageView;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 /**
  *
  * The spaceship object is the user-controlled character of the game.
@@ -113,7 +116,9 @@ public class Ship extends Sprite {
     public Ship() {
 
         canFire = true;
-        ImageView shipImageView = new ImageView(ResourcesManager.SPACE_SHIP1);
+        ImageView shipImageView = null;
+        shipImageView = new ImageView(getClass().getResource(ResourcesManager.SPACE_SHIP1).toExternalForm());
+
         flipBook.getChildren().add(shipImageView);
 
         setNode(flipBook);
@@ -138,7 +143,7 @@ public class Ship extends Sprite {
 
         flipBook.getChildren().clear();
 
-        ImageView shipImageView = new ImageView(newShip);
+        ImageView shipImageView = new ImageView(getClass().getResource(newShip).toExternalForm());
         flipBook.getChildren().add(shipImageView);
         setNode(flipBook);
         flipBook.setTranslateX(currentX);

@@ -55,8 +55,20 @@ public class HomePageController {
      */
     private void setImageView() {
 
-        Image image = new Image(ResourcesManager.LEVELS_LIST[currentChosenLevel.get() - 1]);
+        String path = ResourcesManager.LEVELS_LIST[currentChosenLevel.get() - 1];
+        System.out.println("Current path: " + path);
+        Image image = new Image(getClass().getResource(path).toExternalForm());
         imageview.setImage(image);
+
+    }
+
+    public static void main(String[] args) {
+        
+        String path = ResourcesManager.LEVELS_LIST[0];
+        System.out.println("Path: " + path);
+        Image image = new Image(HomePageController.class.getResource(path).toExternalForm());
+        System.out.println("Image: " + image);
+    
 
     }
 
@@ -97,7 +109,7 @@ public class HomePageController {
         leftBtn.setOnMouseExited((e) -> {
             leftBtn.setTextFill(Color.BLACK);
         });
-        leftBtn.setBackground(Background.fill(Color.TRANSPARENT));
+        leftBtn.setBackground(Background.EMPTY);
         leftBtn.setOnAction((e) -> {
 
             int i = currentChosenLevel.get();
@@ -119,7 +131,7 @@ public class HomePageController {
 
             rightBtn.setTextFill(Color.BLACK);
         });
-        rightBtn.setBackground(Background.fill(Color.TRANSPARENT));
+        rightBtn.setBackground(Background.EMPTY);
 
         rightBtn.setOnAction((e) -> {
             int i = currentChosenLevel.get();

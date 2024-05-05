@@ -3,8 +3,6 @@ package edu.vanier.ufo.engine;
 import edu.vanier.ufo.helpers.HomePageController;
 import edu.vanier.ufo.helpers.ResourcesManager;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -202,7 +200,7 @@ public abstract class GameEngine {
 
         // If the user won
         if (isVictory) {
-            ImageView victoryImageView = new ImageView(ResourcesManager.VICTORY);
+            ImageView victoryImageView = new ImageView(getClass().getResource(ResourcesManager.VICTORY).toExternalForm());
             victoryImageView.setFitWidth(100);
             victoryImageView.setPreserveRatio(true);
             alert.setGraphic(victoryImageView);
@@ -212,7 +210,7 @@ public abstract class GameEngine {
 
         // If the user lost
         } else {
-            ImageView defeatImageView = new ImageView(ResourcesManager.GAME_OVER);
+            ImageView defeatImageView = new ImageView(getClass().getResource(ResourcesManager.GAME_OVER).toExternalForm());
             defeatImageView.setFitWidth(100);
             defeatImageView.setPreserveRatio(true);
             alert.setGraphic(defeatImageView);

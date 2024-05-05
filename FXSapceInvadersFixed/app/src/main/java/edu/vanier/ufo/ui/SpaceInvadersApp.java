@@ -3,6 +3,9 @@ package edu.vanier.ufo.ui;
 import edu.vanier.ufo.engine.GameEngine;
 import edu.vanier.ufo.helpers.HomePageController;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -26,9 +29,11 @@ public class SpaceInvadersApp extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws IOException, URISyntaxException {
+
+        System.out.println(getClass().getResource(("/fxml/homepage.fxml")).toURI().toURL());
         // Load the homepage fxml file into the scene
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/homepage.fxml")).toURI().toURL());
         loader.setController(new HomePageController());
         Pane pane = loader.load();
         

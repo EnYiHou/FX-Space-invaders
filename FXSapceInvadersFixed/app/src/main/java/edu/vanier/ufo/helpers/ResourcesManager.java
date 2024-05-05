@@ -14,9 +14,9 @@ public class ResourcesManager {
      */
     public static final int FRAMES_PER_SECOND = 65;
     private static final String RESOURCES_FOLDER = "";
-    private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "images/";
-    private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "sounds/";
-    private static final String FXML_FOLDER = RESOURCES_FOLDER + "fxml/";
+    private static final String IMAGES_FOLDER = RESOURCES_FOLDER + "/images/";
+    private static final String SOUNDS_FOLDER = RESOURCES_FOLDER + "/sounds/";
+    private static final String FXML_FOLDER = RESOURCES_FOLDER + "/fxml/";
 
     private static final String LEVEL_IMAGES = IMAGES_FOLDER + "levels/";
     private static final String ENDSCREEN_IMAGES = IMAGES_FOLDER + "endscreen/";

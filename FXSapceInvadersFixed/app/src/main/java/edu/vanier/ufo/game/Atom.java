@@ -35,7 +35,7 @@ public class Atom extends Sprite {
      */
     public Atom(String imagePath) {
         ImageView newAtom = new ImageView();
-        Image shipImage = new Image(imagePath);
+        Image shipImage = new Image(getClass().getResource(imagePath).toExternalForm());
         newAtom.setImage(shipImage);
         newAtom.setCache(true);
         newAtom.setCacheHint(CacheHint.ROTATE);
@@ -84,8 +84,8 @@ public class Atom extends Sprite {
         Node currentNode = getNode();
         isDead = true;
 
-        Image explosionImage = new Image(ResourcesManager.ROCKET_EXPLOSION, 150d, 150d, true, true);
-        ImageView explosionAnimation = new ImageView(explosionImage);
+        Image explosionImage = new Image(getClass().getResource(ResourcesManager.ROCKET_EXPLOSION).toExternalForm(), 150d, 150d, true, true);
+        ImageView explosionAnimation = new ImageView(getClass().getResource(ResourcesManager.ROCKET_EXPLOSION).toExternalForm());
         Group group = new Group(explosionAnimation);
         
         
