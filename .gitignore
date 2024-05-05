@@ -1,0 +1,24 @@
+# MacOS 
+.DS_Store
+
+# Vscode
+.vscode/*
+.history/*
+
+# IntelliJ
+*/.idea/*
+
+
+# Gradle
+*/.gradle/*
+
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven
+*.bin
